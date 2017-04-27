@@ -12,14 +12,6 @@ class CQ
   include CQ::DataFinder
   include CQ::MessageFormatter
 
-  match(/text (.+)/,         method: :cmd_text)
-  match(/find (\S+) ?(.+)?/, method: :cmd_find)
-  match(/hero (.+)/,         method: :cmd_hero)
-  match(/block (.+)/,        method: :cmd_block)
-  match(/passive (.+)/,      method: :cmd_passive)
-  match(/skill (.+)/,        method: :cmd_skill)
-  match(/stats (.+)/,        method: :cmd_stats)
-
   # Get a text whose key or value matches a query. Optionally pass a result number.
   # Can query with regex.
   #
@@ -29,6 +21,7 @@ class CQ
   #   !text meow 7
   #   !text /mon_.*_name/i
   #   !text /mon_.*_name/i 3
+  match(/text (.+)/, method: :cmd_text)
   def cmd_text(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -51,6 +44,7 @@ class CQ
   #   !find hero vesper
   #   !find skill goddess
   #   !find hero /ri$/i
+  match(/find (\S+) ?(.+)?/, method: :cmd_find)
   def cmd_find(m, type, query)
     message_on_error(m) do
       results = if type.downcase == "hero"
@@ -73,6 +67,7 @@ class CQ
   #   !hero vesper 6
   #   !hero /a(l|r)tair/i
   #   !hero /a(l|r)tair/i 6
+  match(/hero (.+)/, method: :cmd_hero)
   def cmd_hero(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -95,6 +90,7 @@ class CQ
   #   !block vesper 6
   #   !block /a(l|r)tair/i
   #   !block /a(l|r)tair/i 6
+  match(/block (.+)/, method: :cmd_block)
   def cmd_block(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -117,6 +113,7 @@ class CQ
   #   !passive vesper 6
   #   !passive /a(l|r)tair/i
   #   !passive /a(l|r)tair/i 6
+  match(/passive (.+)/, method: :cmd_passive)
   def cmd_passive(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -139,6 +136,7 @@ class CQ
   #   !stats may
   #   !stats may 6
   #   !stats may 6 52 3 false
+  match(/skill (.+)/, method: :cmd_skill)
   def cmd_stats(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -174,6 +172,7 @@ class CQ
   # Examples:
   #   !skill energy
   #   !skill energy 2
+  match(/stats (.+)/, method: :cmd_stats)
   def cmd_skill(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
