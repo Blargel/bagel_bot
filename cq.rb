@@ -232,7 +232,7 @@ class CQ
     begin
       block.call
     rescue => e
-      m.reply("#{m.user.nick}: Error! Blargel is a scrub at programming!")
+      m.reply("#{m.user.nick}: Error - Blargel is a scrub at programming!")
       raise e
     end
   end

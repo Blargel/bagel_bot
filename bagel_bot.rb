@@ -26,6 +26,23 @@ bot = Cinch::Bot.new do
 
     c.plugins.options[Cinch::Plugins::Identify] = config[:nickserv]
   end
+
+  # Shoving it here because and maintaining it manually because I don't think
+  # there's a way for Cinch to know.
+  on :message, /^!commands/ do |m|
+    commands = [
+      "!block",
+      "!commands",
+      "!find",
+      "!hero",
+      "!passive",
+      "!skill",
+      "!slap",
+      "!stats",
+      "!text"
+    ]
+    m.reply("#{m.user.nick}: #{commands.join(", ")}")
+  end
 end
 
 bot.start
