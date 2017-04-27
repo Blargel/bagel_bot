@@ -116,12 +116,21 @@ class CQ
       end
     end
 
-    # Finds one stat object via a given stat id.
+    # Finds one stat hash via a given stat id.
     # Returns a matching stat hash or nil.
     def find_hero_stats_by_id(stat_id)
-      stat_data = get_data("character_stat")
-      stat_data.find do |stat|
-        stat["id"] == stat_id
+      stats_data = get_data("character_stat")
+      stats_data.find do |stats|
+        stats["id"] == stat_id
+      end
+    end
+
+    # Finds one berry stat hash via a given berry stat id
+    # Returns a matching berry stat hash or nil.
+    def find_berry_stats_by_id(berry_stat_id)
+      berry_stats_data = get_data("character_addstatmax")
+      berry_stats_data.find do |berry_stats|
+        berry_stats["id"] == berry_stat_id
       end
     end
 

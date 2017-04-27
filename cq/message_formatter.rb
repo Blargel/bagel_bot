@@ -82,6 +82,38 @@ class CQ
       "Hero Name - #{hero_name} | Class - #{hero_stars}☆ #{hero_class} | #{passive_text}"
     end
 
+    # Message formatter for the !stats command
+    def formatted_stats_message(query, stars, level, bread, berry, hero, hero_stats, berry_stats)
+      return "No #{ stars.to_s + "☆ " if stars}hero's name matches \"#{query}\"!" if hero_stats.nil?
+
+      stars ||= hero_stats["grade"]
+      level ||= stars*10
+      bread ||= stars-1
+      berry = true if berry.nil?
+
+      return "Error - Invalid star level: #{stars}." if stars && ![1,2,3,4,5,6].include?(stars)
+      return "Error - Invalid level for #{stars}☆ hero: #{level}" if level && (level > stars*10 || level < 1)
+      return "Error - Invalid training for #{stars}☆ hero: #{bread}" if bread && (bread > stars-1 || bread < 0)
+
+      stats      = calculate_stats(level, bread, berry, hero_stats, berry_stats)
+      hero_name  = CQ::TEXT[hero["name"]].to_s.gsub("\n", " ")
+      berry_text = if stars == 6
+                     berry ? "with berries " : "without berries "
+                   else
+                     ""
+                   end
+
+      "\x02Level #{level} #{hero_name} +#{bread} #{ berry_text }\x02- " +
+      "#{stats[:ha].round(1)} Atk. Power | " +
+      "#{stats[:hp].round(1)} HP | " +
+      "#{(stats[:cc]*100).round(1)} Crit.Chance | " +
+      "#{stats[:arm].round(1)} Armor | " +
+      "#{stats[:res].round(1)} Resistance | " +
+      "#{(stats[:cd]*100).round(1)} Crit.Damage | " +
+      "#{(stats[:acc]*100).round(1)} Accuracy | " +
+      "#{(stats[:eva]*100).round(1)} Evasion"
+    end
+
     # Message formatter for the !skill command
     def formatted_skill_message(query, level, skill)
       return "No skill names match \"#{query}\" and level #{level}!" if skill.nil?
@@ -94,6 +126,26 @@ class CQ
       skill_cost  = skill_cost.join(", ")
 
       "#{skill_name} Level #{skill_level} | Great Rate - #{skill_great} | Cost - #{skill_cost} | Description - #{skill_desc}"
+    end
+
+    # Calculate all stats for a hero with the given data
+    def calculate_stats(level, bread, berry, hero_stats, berry_stats)
+      berry = berry_stats && berry
+      {
+        :ha  => calculate_stat(level, bread, hero_stats["initialattdmg"], hero_stats["growthattdmg"],  berry ? berry_stats["attack_power"] : 0),
+        :hp  => calculate_stat(level, bread, hero_stats["initialhp"],     hero_stats["growthhp"],      berry ? berry_stats["hp"] : 0),
+        :cc  => calculate_stat(level, 0,     hero_stats["critprob"],      0,                           berry ? berry_stats["critical_chance"] : 0),
+        :arm => calculate_stat(level, bread, hero_stats["defense"],       hero_stats["growthdefense"], berry ? berry_stats["armor"] : 0),
+        :res => calculate_stat(level, bread, hero_stats["resist"],        hero_stats["growthresist"],  berry ? berry_stats["resistance"] : 0),
+        :cd  => calculate_stat(level, 0,     hero_stats["critpower"],     0,                           berry ? berry_stats["critical_damage"] : 0),
+        :acc => calculate_stat(level, 0,     hero_stats["hitrate"],       0,                           berry ? berry_stats["accuracy"] : 0),
+        :eva => calculate_stat(level, 0,     hero_stats["dodgerate"],     0,                           berry ? berry_stats["dodge"] : 0)
+      }
+    end
+
+    # Calculate one stat with the given data
+    def calculate_stat(level, bread, start, growth, berry_stat)
+      ((start + growth*(level-1)) * (1 + bread.to_f/10) + berry_stat)
     end
   end
 end

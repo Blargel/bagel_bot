@@ -18,7 +18,17 @@ class CQ
   match(/block (.+)/,        method: :cmd_block)
   match(/passive (.+)/,      method: :cmd_passive)
   match(/skill (.+)/,        method: :cmd_skill)
+  match(/stats (.+)/,        method: :cmd_stats)
 
+  # Get a text whose key or value matches a query. Optionally pass a result number.
+  # Can query with regex.
+  #
+  # Usage: !text query [result_num]
+  # Examples:
+  #   !text meow
+  #   !text meow 7
+  #   !text /mon_.*_name/i
+  #   !text /mon_.*_name/i 3
   def cmd_text(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -33,6 +43,14 @@ class CQ
     end
   end
 
+  # Get a list of names of a type of data. Returns first 50 results if over 50 results.
+  # Can query with regex.
+  #
+  # Usage: !find (hero|skill) query
+  # Examples:
+  #   !find hero vesper
+  #   !find skill goddess
+  #   !find hero /ri$/i
   def cmd_find(m, type, query)
     message_on_error(m) do
       results = if type.downcase == "hero"
@@ -41,11 +59,20 @@ class CQ
                   find_skills_by_name(query)
                 end
 
-      message = results ? formatted_find_message(type, query, results) : "Unknown type: #{type}. Available types: hero, skill"
+      message = results ? formatted_find_message(type, query, results) : "Error - Unknown type: #{type}. Available types: hero, skill"
       m.reply("#{m.user.nick}: #{message}")
     end
   end
 
+  # Get data about a hero. Optionally pass the hero's star level to narrow results.
+  # Can query with regex.
+  #
+  # Usage: !hero query [hero_stars]
+  # Examples:
+  #   !hero vesper
+  #   !hero vesper 6
+  #   !hero /a(l|r)tair/i
+  #   !hero /a(l|r)tair/i 6
   def cmd_hero(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -59,6 +86,15 @@ class CQ
     end
   end
 
+  # Get data about a hero's block skill. Optionally pass the hero's star level to narrow results.
+  # Can query with regex.
+  #
+  # Usage: !block query [hero_stars]
+  # Examples:
+  #   !block vesper
+  #   !block vesper 6
+  #   !block /a(l|r)tair/i
+  #   !block /a(l|r)tair/i 6
   def cmd_block(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -72,6 +108,15 @@ class CQ
     end
   end
 
+  # Get data about a hero's passive. Optionally pass the hero's star level to narrow results.
+  # Can query with regex.
+  #
+  # Usage: !passive query [hero_stars]
+  # Examples:
+  #   !passive vesper
+  #   !passive vesper 6
+  #   !passive /a(l|r)tair/i
+  #   !passive /a(l|r)tair/i 6
   def cmd_passive(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
@@ -85,6 +130,50 @@ class CQ
     end
   end
 
+  # Get the stats of a hero at specified star, level, training, and berry.
+  # Defaults to maximum level, training, and berry for the found hero.
+  # Can query with regex.
+  #
+  # Usage: !stats query [stars [level bread berry]]
+  # Examples:
+  #   !stats may
+  #   !stats may 6
+  #   !stats may 6 52 3 false
+  def cmd_stats(m, opts)
+    message_on_error(m) do
+      opts  = opts.strip.split
+      berry = nil
+      bread = nil
+      level = nil
+      stars = nil
+
+      if opts.length >= 5 && ["true", "false"].include?(opts.last)
+        berry = opts.pop == "true"
+        bread = opts.pop.to_i
+        level = opts.pop.to_i
+        stars = opts.pop.to_i
+      elsif [1,2,3,4,5,6].include?(opts.last.to_i)
+        stars = opts.pop.to_i
+      end
+
+      query = opts.join(" ")
+
+      hero, hero_stats = find_hero_and_stats(query, stars)
+      berry_stats      = find_berry_stats_by_id(hero_stats["addstat_max_id"]) if hero_stats
+
+      message = formatted_stats_message(query, stars, level, bread, berry, hero, hero_stats, berry_stats)
+      m.reply("#{m.user.nick}: #{message}")
+    end
+  end
+
+  # Get data about an sp skill. Optionally pass a level for the skill.
+  # Defaults to the maximum level for the skill.
+  # Can query with regex.
+  #
+  # Usage: !skill query [level]
+  # Examples:
+  #   !skill energy
+  #   !skill energy 2
   def cmd_skill(m, opts)
     message_on_error(m) do
       opts  = opts.strip.split
