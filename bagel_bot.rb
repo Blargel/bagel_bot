@@ -10,8 +10,9 @@ config = YAML.load_file("./config.yml")
 
 bot = Cinch::Bot.new do
   configure do |c|
-    c.server   = "irc.mibbit.com"
-    c.channels = ["#cquest"]
+    c.server      = "irc.mibbit.com"
+    c.channels    = ["#cquest"]
+    c.delay_joins = :identified
 
     c.nick     = "BagelBot"
     c.realname = "BagelBot"
