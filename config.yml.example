@@ -1,0 +1,4 @@
+:nickserv:
+  :username: BagelBot
+  :password: somepassword
+  :type: :nickserv
