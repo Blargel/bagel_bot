@@ -4,6 +4,7 @@ require 'cinch'
 require 'cinch/plugins/identify'
 require 'yaml'
 require './cq'
+require './slap'
 
 config = YAML.load_file("./config.yml")
 
@@ -17,8 +18,9 @@ bot = Cinch::Bot.new do
     c.user     = "BagelBot"
 
     c.plugins.plugins = [
+      Cinch::Plugins::Identify,
       CQ,
-      Cinch::Plugins::Identify
+      Slap
     ]
 
     c.plugins.options[Cinch::Plugins::Identify] = config[:nickserv]
