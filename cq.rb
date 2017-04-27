@@ -15,15 +15,20 @@ class CQ
   # Get a text whose key or value matches a query. Optionally pass a result number.
   # Can query with regex.
   #
-  # Usage: !text query [result_num]
+  # Usage: !text query [num]
   # Examples:
   #   !text meow
   #   !text meow 7
   #   !text /mon_.*_name/i
   #   !text /mon_.*_name/i 3
-  match(/text (.+)/, method: :cmd_text)
+  match(/text(?:$|(?: (.+)?))/, method: :cmd_text)
   def cmd_text(m, opts)
     message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !text query [num]")
+        return
+      end
+
       opts  = opts.strip.split
       num   = opts.last == opts.last.to_i.to_s ? opts.pop.to_i : 1
       query = opts.join(" ")
@@ -44,16 +49,21 @@ class CQ
   #   !find hero vesper
   #   !find skill goddess
   #   !find hero /ri$/i
-  match(/find (\S+) ?(.+)?/, method: :cmd_find)
+  match(/find(?:$|(?: (\S+)?(?:$| (.+)?)))/, method: :cmd_find)
   def cmd_find(m, type, query)
     message_on_error(m) do
+      if query.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !find (hero|skill) query")
+        return
+      end
+
       results = if type.downcase == "hero"
                   find_heroes_by_name(query)
                 elsif type.downcase == "skill"
                   find_skills_by_name(query)
                 end
 
-      message = results ? formatted_find_message(type, query, results) : "Error - Unknown type: #{type}. Available types: hero, skill"
+      message = results ? formatted_find_message(type, query, results) : "Error - Unknown type: #{type} | Available types - hero, skill"
       m.reply("#{m.user.nick}: #{message}")
     end
   end
@@ -61,15 +71,20 @@ class CQ
   # Get data about a hero. Optionally pass the hero's star level to narrow results.
   # Can query with regex.
   #
-  # Usage: !hero query [hero_stars]
+  # Usage: !hero query [stars]
   # Examples:
   #   !hero vesper
   #   !hero vesper 6
   #   !hero /a(l|r)tair/i
   #   !hero /a(l|r)tair/i 6
-  match(/hero (.+)/, method: :cmd_hero)
+  match(/hero(?:$|(?: (.+)?))/, method: :cmd_hero)
   def cmd_hero(m, opts)
     message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !hero query [stars]")
+        return
+      end
+
       opts  = opts.strip.split
       stars = [1,2,3,4,5,6].include?(opts.last.to_i) ? opts.pop.to_i : nil
       query = opts.join(" ")
@@ -84,15 +99,20 @@ class CQ
   # Get data about a hero's block skill. Optionally pass the hero's star level to narrow results.
   # Can query with regex.
   #
-  # Usage: !block query [hero_stars]
+  # Usage: !block query [stars]
   # Examples:
   #   !block vesper
   #   !block vesper 6
   #   !block /a(l|r)tair/i
   #   !block /a(l|r)tair/i 6
-  match(/block (.+)/, method: :cmd_block)
+  match(/block(?:$|(?: (.+)?))/, method: :cmd_block)
   def cmd_block(m, opts)
     message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !block query [stars]")
+        return
+      end
+
       opts  = opts.strip.split
       stars = [1,2,3,4,5,6].include?(opts.last.to_i) ? opts.pop.to_i : nil
       query = opts.join(" ")
@@ -107,15 +127,20 @@ class CQ
   # Get data about a hero's passive. Optionally pass the hero's star level to narrow results.
   # Can query with regex.
   #
-  # Usage: !passive query [hero_stars]
+  # Usage: !passive query [stars]
   # Examples:
   #   !passive vesper
   #   !passive vesper 6
   #   !passive /a(l|r)tair/i
   #   !passive /a(l|r)tair/i 6
-  match(/passive (.+)/, method: :cmd_passive)
+  match(/passive(?:$|(?: (.+)?))/, method: :cmd_passive)
   def cmd_passive(m, opts)
     message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !passive query [stars]")
+        return
+      end
+
       opts  = opts.strip.split
       stars = [1,2,3,4,5,6].include?(opts.last.to_i) ? opts.pop.to_i : nil
       query = opts.join(" ")
@@ -136,9 +161,14 @@ class CQ
   #   !stats may
   #   !stats may 6
   #   !stats may 6 52 3 false
-  match(/skill (.+)/, method: :cmd_skill)
+  match(/stats(?:$|(?: (.+)?))/, method: :cmd_stats)
   def cmd_stats(m, opts)
     message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !stats query [stars [level bread berry]]")
+        return
+      end
+
       opts  = opts.strip.split
       berry = nil
       bread = nil
@@ -172,9 +202,14 @@ class CQ
   # Examples:
   #   !skill energy
   #   !skill energy 2
-  match(/stats (.+)/, method: :cmd_stats)
+  match(/skill(?:$|(?: (.+)?))/, method: :cmd_skill)
   def cmd_skill(m, opts)
     message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !skill query [level]")
+        return
+      end
+
       opts  = opts.strip.split
       level = opts.last == opts.last.to_i.to_s ? opts.pop.to_i : nil
       query = opts.join(" ")

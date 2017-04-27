@@ -103,7 +103,7 @@ class CQ
                      ""
                    end
 
-      "\x02Level #{level} #{hero_name} +#{bread} #{ berry_text }\x02- " +
+      "Level #{level} #{hero_name} +#{bread} #{ berry_text }- " +
       "#{stats[:ha].round(1)} Atk. Power | " +
       "#{stats[:hp].round(1)} HP | " +
       "#{(stats[:cc]*100).round(1)} Crit.Chance | " +
