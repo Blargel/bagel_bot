@@ -5,7 +5,7 @@ require 'cinch/plugins/identify'
 require 'yaml'
 require './cq'
 
-config = YAML.load_file("./config.yml"))
+config = YAML.load_file("./config.yml")
 
 bot = Cinch::Bot.new do
   configure do |c|
