@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'cinch'
+require 'json'
 
 require './cq/data_finder'
 require './cq/message_formatter'

@@ -1,0 +1,21 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    cinch (2.3.3)
+    cinch-identify (1.7.0)
+      cinch (~> 2.0)
+    json (2.1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  cinch
+  cinch-identify
+  json
+
+RUBY VERSION
+   ruby 2.3.4p301
+
+BUNDLED WITH
+   1.14.6
