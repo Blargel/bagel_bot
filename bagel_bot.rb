@@ -31,7 +31,9 @@ bot = Cinch::Bot.new do
   # there's a way for Cinch to know.
   on :message, /^!commands/ do |m|
     commands = [
+      "!berry",
       "!block",
+      "!bread",
       "!commands",
       "!find",
       "!hero",

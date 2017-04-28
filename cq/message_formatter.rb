@@ -104,12 +104,12 @@ class CQ
                    end
 
       "Level #{level} #{hero_name} +#{bread} #{ berry_text }- " +
-      "#{stats[:ha].round(1)} Atk. Power | " +
+      "#{stats[:ha].round(1)} Attack Power | " +
       "#{stats[:hp].round(1)} HP | " +
-      "#{(stats[:cc]*100).round(1)} Crit.Chance | " +
+      "#{(stats[:cc]*100).round(1)} Critical Chance | " +
       "#{stats[:arm].round(1)} Armor | " +
       "#{stats[:res].round(1)} Resistance | " +
-      "#{(stats[:cd]*100).round(1)} Crit.Damage | " +
+      "#{(stats[:cd]*100).round(1)} Critical Damage | " +
       "#{(stats[:acc]*100).round(1)} Accuracy | " +
       "#{(stats[:eva]*100).round(1)} Evasion"
     end
@@ -125,7 +125,48 @@ class CQ
       skill_cost  = skill["cost"].map { |resource| "#{resource["value"]} #{resource["type"].capitalize}" }
       skill_cost  = skill_cost.join(", ")
 
-      "#{skill_name} Level #{skill_level} | Great Rate - #{skill_great} | Cost - #{skill_cost} | Description - #{skill_desc}"
+      "#{skill_name} Level #{skill_level} | Great - #{skill_great} | Cost - #{skill_cost} | Description - #{skill_desc}"
+    end
+
+    # Message formatter for the !bread command
+    def formatted_bread_message(query, stars, bread)
+      return "No #{ stars.to_s + "☆ " if stars}bread names match \"#{query}\"!" if bread.nil?
+
+      bread_name     = CQ::TEXT[bread["name"]].to_s.gsub("\n", " ")
+      bread_stars    = bread["grade"].to_s
+      bread_training = bread["trainpoint"].to_s
+      bread_great    = "#{(bread["critprob"]*100).to_i}%"
+      bread_sell     = bread["sellprice"].to_s
+
+      "#{bread_name} | #{bread_stars}☆ Bread | Training - #{bread_training} | Great - #{bread_great} | Sell Price - #{bread_sell}"
+    end
+
+    # Message formatter for the !berry command
+    def formatted_berry_message(query, stars, berry)
+      return "No #{ stars.to_s + "☆ " if stars}berry names match \"#{query}\"!" if berry.nil?
+
+      berry_name      = CQ::TEXT[berry["name"]].to_s.gsub("\n", " ")
+      berry_stars     = berry["grade"].to_s
+      berry_type      = berry["type"].to_s
+      berry_type_name = CQ::TEXT[berry["type_name"]]
+      berry_value     = berry["add_stat_point"].to_f
+      berry_great     = "#{(berry["great_prob"]*100).to_i}%"
+      berry_eat       = berry["eat_price"].to_s
+      berry_sell      = berry["sell_price"].to_s
+
+      berry_stat = nil
+      case berry_type
+      when /Ratio/, "All"
+        berry_stat = "#{(berry_value*100).to_i}% #{berry_type_name}"
+      when "Accuracy", "CriticalDamage", "CriticalChance", "Dodge"
+        berry_stat = "#{(berry_value*100).round(1)} #{berry_type_name}"
+      when "Armor", "AttackPower", "HP", "Resistance"
+        berry_stat = "#{berry_value.round(1)} #{berry_type_name}"
+      when "Great"
+        berry_stat = "None"
+      end
+
+      "#{berry_name} | #{berry_stars}☆ Berry | Stat - #{berry_stat} | Great - #{berry_great} | Eat Price - #{berry_eat} | Sell Price - #{berry_sell}"
     end
 
     # Calculate all stats for a hero with the given data

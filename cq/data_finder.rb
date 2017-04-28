@@ -134,6 +134,32 @@ class CQ
       end
     end
 
+    # Finds berries whose names match a given query.
+    # Checks if the query can be converted to a regex and sends to the appropriate method.
+    # Returns an array of matching berry hashes.
+    def find_berries_by_name(query)
+      regex = string_to_regex(query)
+      regex ? find_berries_by_name_regex(regex) : find_berries_by_name_substring(query)
+    end
+
+    # Finds berries whose names contain a given substring.
+    # Returns an array of matching berry hashes.
+    def find_berries_by_name_substring(substr)
+      berry_data = get_data("addstatitem")
+      berry_data.keep_if do |berry|
+        CQ::TEXT[berry["name"]].to_s.downcase.include?(substr.downcase)
+      end
+    end
+
+    # Finds berries whose names match a given regex.
+    # Returns an array of matching berry hashes.
+    def find_berries_by_name_regex(regex)
+      berry_data = get_data("addstatitem")
+      berry_data.keep_if do |berry|
+        CQ::TEXT[berry["name"]].to_s =~ regex
+      end
+    end
+
     # Finds skills whose names match a given query.
     # Checks if the query can be converted to a regex and sends to the appropriate method.
     # Returns an array of matching skill hashes.
@@ -157,6 +183,32 @@ class CQ
       skill_data = get_data("spskill")
       skill_data.keep_if do |skill|
         CQ::TEXT[skill["name"]].to_s =~ regex
+      end
+    end
+
+    # Finds breads whose names match a given query.
+    # Checks if the query can be converted to a regex and sends to the appropriate method.
+    # Returns an array of matching bread hashes.
+    def find_breads_by_name(query)
+      regex = string_to_regex(query)
+      regex ? find_breads_by_name_regex(regex) : find_breads_by_name_substring(query)
+    end
+
+    # Finds breads whose names contain a given substring.
+    # Returns an array of matching bread hashes.
+    def find_breads_by_name_substring(substr)
+      bread_data = get_data("bread")
+      bread_data.keep_if do |bread|
+        CQ::TEXT[bread["name"]].to_s.downcase.include?(substr.downcase)
+      end
+    end
+
+    # Finds breads whose names match a given regex.
+    # Returns an array of matching bread hashes.
+    def find_breads_by_name_regex(regex)
+      bread_data = get_data("bread")
+      bread_data.keep_if do |bread|
+        CQ::TEXT[bread["name"]].to_s =~ regex
       end
     end
 

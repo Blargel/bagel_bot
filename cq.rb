@@ -44,7 +44,7 @@ class CQ
   # Get a list of names of a type of data. Returns first 50 results if over 50 results.
   # Can query with regex.
   #
-  # Usage: !find (hero|skill) query
+  # Usage: !find (berry|bread|hero|skill) query
   # Examples:
   #   !find hero vesper
   #   !find skill goddess
@@ -53,13 +53,18 @@ class CQ
   def cmd_find(m, type, query)
     message_on_error(m) do
       if query.nil?
-        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !find (hero|skill) query")
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !find (berry|bread|hero|skill) query")
         return
       end
 
-      results = if type.downcase == "hero"
+      results = case type.downcase
+                when "berry"
+                  find_berries_by_name(query)
+                when "bread"
+                  find_breads_by_name(query)
+                when "hero"
                   find_heroes_by_name(query)
-                elsif type.downcase == "skill"
+                when "skill"
                   find_skills_by_name(query)
                 end
 
@@ -222,6 +227,62 @@ class CQ
               end
 
       message = formatted_skill_message(query, level, skill)
+      m.reply("#{m.user.nick}: #{message}")
+    end
+  end
+
+  # Get data about a type of bread. Optionally pass a star level for the bread.
+  # Can query with regex.
+  #
+  # Usage: !bread query [stars]
+  # Examples:
+  #   !bread donut
+  #   !bread
+  #   !bread /ry.*/i
+  match(/bread(?:$|(?: (.+)?))/, method: :cmd_bread)
+  def cmd_bread(m, opts)
+    message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !bread query [stars]")
+        return
+      end
+
+      opts  = opts.strip.split
+      stars = [1,2,3,4,5,6].include?(opts.last.to_i) ? opts.pop.to_i : nil
+      query = opts.join(" ")
+
+      breads = find_breads_by_name(query.strip)
+      bread = stars ? breads.find { |b| b["grade"] == stars } : breads.first
+
+      message = formatted_bread_message(query, stars, bread)
+      m.reply("#{m.user.nick}: #{message}")
+    end
+  end
+
+  # Get data about a type of berry.Optionally pass a star level for the berry.
+  # Can query with regex.
+  #
+  # Usage: !berry query [stars]
+  # Examples:
+  #   !berry attack
+  #   !berry attack 2
+  #   !berry /(superior|legend)/i
+  match(/berry(?:$|(?: (.+)?))/, method: :cmd_berry)
+  def cmd_berry(m, opts)
+    message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !berry query [stars]")
+        return
+      end
+
+      opts  = opts.strip.split
+      stars = [1,2,3,4,5,6].include?(opts.last.to_i) ? opts.pop.to_i : nil
+      query = opts.join(" ")
+
+      berries = find_berries_by_name(query.strip)
+      berry = stars ? berries.find { |b| b["grade"] == stars } : berries.first
+
+      message = formatted_berry_message(query, stars, berry)
       m.reply("#{m.user.nick}: #{message}")
     end
   end
