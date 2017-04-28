@@ -68,7 +68,7 @@ class CQ
                   find_skills_by_name(query)
                 end
 
-      message = results ? formatted_find_message(type, query, results) : "Error - Unknown type: #{type} | Available types - hero, skill"
+      message = results ? formatted_find_message(type, query, results) : "Error - Unknown type: #{type} | Available types - berry, bread, hero, skill"
       m.reply("#{m.user.nick}: #{message}")
     end
   end
@@ -259,7 +259,7 @@ class CQ
     end
   end
 
-  # Get data about a type of berry.Optionally pass a star level for the berry.
+  # Get data about a type of berry. Optionally pass a star level for the berry.
   # Can query with regex.
   #
   # Usage: !berry query [stars]
@@ -283,6 +283,34 @@ class CQ
       berry = stars ? berries.find { |b| b["grade"] == stars } : berries.first
 
       message = formatted_berry_message(query, stars, berry)
+      m.reply("#{m.user.nick}: #{message}")
+    end
+  end
+
+  # Get data about a weapon. Optionally pass a star level for the weapon.
+  # Can query with regex.
+  #
+  # Usage: !weapon query [stars]
+  # Examples:
+  #   !weapon excalibur
+  #   !weapon /sword$/i 6
+  match(/weapon(?:$|(?: (.+)?))/, method: :cmd_weapon)
+  def cmd_weapon(m, opts)
+    message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !weapon query [stars]")
+        return
+      end
+
+      opts  = opts.strip.split
+      stars = [1,2,3,4,5,6].include?(opts.last.to_i) ? opts.pop.to_i : nil
+      query = opts.join(" ")
+
+      weapons = find_weapons_by_name(query.strip)
+      weapon = stars ? weapons.find { |w| w["grade"] == stars } : weapons.first
+      bound_to = find_heroes_by_ids(Array(weapon["reqhero"]))
+
+      message = formatted_weapon_message(query, stars, weapon, bound_to)
       m.reply("#{m.user.nick}: #{message}")
     end
   end

@@ -116,6 +116,15 @@ class CQ
       end
     end
 
+    # Finds heroes via a given array of hero ids.
+    # Returns an array of matching heroes
+    def find_heroes_by_ids(hero_ids)
+      hero_data = get_data("character_visual")
+      hero_data.keep_if do |hero|
+        hero_ids.include?(hero["id"])
+      end
+    end
+
     # Finds one stat hash via a given stat id.
     # Returns a matching stat hash or nil.
     def find_hero_stats_by_id(stat_id)
@@ -157,6 +166,32 @@ class CQ
       berry_data = get_data("addstatitem")
       berry_data.keep_if do |berry|
         CQ::TEXT[berry["name"]].to_s =~ regex
+      end
+    end
+
+    # Finds weapons whose names match a given query.
+    # Checks if the query can be converted to a regex and sends to the appropriate method.
+    # Returns an array of matching weapon hashes.
+    def find_weapons_by_name(query)
+      regex = string_to_regex(query)
+      regex ? find_weapons_by_name_regex(regex) : find_weapons_by_name_substring(query)
+    end
+
+    # Finds weapons whose names contain a given substring.
+    # Returns an array of matching weapon hashes.
+    def find_weapons_by_name_substring(substr)
+      weapon_data = get_data("weapon")
+      weapon_data.keep_if do |weapon|
+        weapon["type"] == "HERO" && CQ::TEXT[weapon["name"]].to_s.downcase.include?(substr.downcase)
+      end
+    end
+
+    # Finds weapons whose names match a given regex.
+    # Returns an array of matching weapon hashes.
+    def find_weapons_by_name_regex(regex)
+      weapon_data = get_data("weapon")
+      weapon_data.keep_if do |weapon|
+        weapon["type"] == "HERO" && CQ::TEXT[weapon["name"]].to_s =~ regex
       end
     end
 

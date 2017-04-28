@@ -41,7 +41,8 @@ bot = Cinch::Bot.new do
       "!skill",
       "!slap",
       "!stats",
-      "!text"
+      "!text",
+      "!weapon"
     ]
     m.reply("#{m.user.nick}: #{commands.join(", ")}")
   end

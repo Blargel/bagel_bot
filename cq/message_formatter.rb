@@ -46,12 +46,12 @@ class CQ
       hero_gender   = hero["gender"].to_s.capitalize
       hero_desc     = CQ::TEXT[hero["desc"]].to_s.gsub("\n", " ")
 
-      "Hero Name - #{hero_name} | " +
-      "Class - #{hero_stars}☆ #{hero_class} | " +
-      "Faction - #{hero_faction} | " +
-      "How to get - #{hero_howtoget} | " +
-      "Gender - #{hero_gender} | " +
-      "Background - #{hero_desc}"
+      "#{hero_name}" +
+        " | Class - #{hero_stars}☆ #{hero_class}" +
+        " | Faction - #{hero_faction}" +
+        " | How to get - #{hero_howtoget}" +
+        " | Gender - #{hero_gender}" +
+        " | Background - #{hero_desc}"
     end
 
     # Message formatter for the !block command
@@ -65,7 +65,9 @@ class CQ
       block_desc = CQ::TEXT[hero_stats["skill_desc"]]
       block_text = block_name.nil? ? "This hero has no block skill." : "#{block_name.to_s.gsub("\n", " ")} - #{block_desc.to_s.gsub("\n", " ")}"
 
-      "Hero Name - #{hero_name} | Class - #{hero_stars}☆ #{hero_class} | #{block_text}"
+      "#{hero_name}" +
+        " | Class - #{hero_stars}☆ #{hero_class}" +
+        " | #{block_text}"
     end
 
     # Message formatter for the !passive command
@@ -79,7 +81,9 @@ class CQ
       passive_desc = CQ::TEXT[hero_stats["skill_subdesc"]]
       passive_text = passive_name.nil? ? "This hero has no passive." : "#{passive_name.to_s.gsub("\n", " ")} - #{passive_desc.to_s.gsub("\n", " ")}"
 
-      "Hero Name - #{hero_name} | Class - #{hero_stars}☆ #{hero_class} | #{passive_text}"
+      "#{hero_name}" +
+        " | Class - #{hero_stars}☆ #{hero_class}" +
+        " | #{passive_text}"
     end
 
     # Message formatter for the !stats command
@@ -98,20 +102,20 @@ class CQ
       stats      = calculate_stats(level, bread, berry, hero_stats, berry_stats)
       hero_name  = CQ::TEXT[hero["name"]].to_s.gsub("\n", " ")
       berry_text = if stars == 6
-                     berry ? "with berries " : "without berries "
+                     berry ? " with berries" : " without berries "
                    else
                      ""
                    end
 
-      "Level #{level} #{hero_name} +#{bread} #{ berry_text }- " +
-      "#{stats[:ha].round(1)} Attack Power | " +
-      "#{stats[:hp].round(1)} HP | " +
-      "#{(stats[:cc]*100).round(1)} Critical Chance | " +
-      "#{stats[:arm].round(1)} Armor | " +
-      "#{stats[:res].round(1)} Resistance | " +
-      "#{(stats[:cd]*100).round(1)} Critical Damage | " +
-      "#{(stats[:acc]*100).round(1)} Accuracy | " +
-      "#{(stats[:eva]*100).round(1)} Evasion"
+      "Level #{level} #{hero_name} +#{bread}#{berry_text}" +
+        " - #{stats[:ha].round(1)} Atk Power" +
+        " | #{stats[:hp].round(1)} HP" +
+        " | #{(stats[:cc]*100).round(1)} Crit Chance" +
+        " | #{stats[:arm].round(1)} Armor" +
+        " | #{stats[:res].round(1)} Resistance" +
+        " | #{(stats[:cd]*100).round(1)} Crit Dmg" +
+        " | #{(stats[:acc]*100).round(1)} Accuracy" +
+        " | #{(stats[:eva]*100).round(1)} Evasion"
     end
 
     # Message formatter for the !skill command
@@ -119,13 +123,16 @@ class CQ
       return "No skill names match \"#{query}\" and level #{level}!" if skill.nil?
 
       skill_name  = CQ::TEXT[skill["name"]].to_s.gsub("\n", " ")
-      skill_level = skill["level"].to_s
+      skill_level = skill["level"].to_i
       skill_desc  = CQ::TEXT[skill["desc"]].to_s.gsub("\n", " ")
       skill_great = "#{(skill["huge"]*100).to_i}%"
       skill_cost  = skill["cost"].map { |resource| "#{resource["value"]} #{resource["type"].capitalize}" }
       skill_cost  = skill_cost.join(", ")
 
-      "#{skill_name} Level #{skill_level} | Great - #{skill_great} | Cost - #{skill_cost} | Description - #{skill_desc}"
+      "#{skill_name} Level #{skill_level}" +
+        " | Great - #{skill_great}" +
+        " | Cost - #{skill_cost}" +
+        " | Description - #{skill_desc}"
     end
 
     # Message formatter for the !bread command
@@ -133,12 +140,16 @@ class CQ
       return "No #{ stars.to_s + "☆ " if stars}bread names match \"#{query}\"!" if bread.nil?
 
       bread_name     = CQ::TEXT[bread["name"]].to_s.gsub("\n", " ")
-      bread_stars    = bread["grade"].to_s
+      bread_stars    = bread["grade"].to_i
       bread_training = bread["trainpoint"].to_s
       bread_great    = "#{(bread["critprob"]*100).to_i}%"
       bread_sell     = bread["sellprice"].to_s
 
-      "#{bread_name} | #{bread_stars}☆ Bread | Training - #{bread_training} | Great - #{bread_great} | Sell Price - #{bread_sell}"
+      "#{bread_name}" +
+        " | #{bread_stars}☆ Bread" +
+        " | Training - #{bread_training}" +
+        " | Great - #{bread_great}" +
+        " | Sell Price - #{bread_sell}"
     end
 
     # Message formatter for the !berry command
@@ -146,7 +157,7 @@ class CQ
       return "No #{ stars.to_s + "☆ " if stars}berry names match \"#{query}\"!" if berry.nil?
 
       berry_name      = CQ::TEXT[berry["name"]].to_s.gsub("\n", " ")
-      berry_stars     = berry["grade"].to_s
+      berry_stars     = berry["grade"].to_i
       berry_type      = berry["type"].to_s
       berry_type_name = CQ::TEXT[berry["type_name"]]
       berry_value     = berry["add_stat_point"].to_f
@@ -166,7 +177,42 @@ class CQ
         berry_stat = "None"
       end
 
-      "#{berry_name} | #{berry_stars}☆ Berry | Stat - #{berry_stat} | Great - #{berry_great} | Eat Price - #{berry_eat} | Sell Price - #{berry_sell}"
+      "#{berry_name}" +
+        " | #{berry_stars}☆ Berry" +
+        " | Stat - #{berry_stat}" +
+        " | Great - #{berry_great}" +
+        " | Eat Price - #{berry_eat}" +
+        " | Sell Price - #{berry_sell}"
+    end
+
+    # Message formatter for the !weapon command
+    def formatted_weapon_message(query, stars, weapon, weapon_bound_to)
+      return "No #{ stars.to_s + "☆ " if stars}weapon names match \"#{query}\"!" if weapon.nil?
+
+      weapon_name     = CQ::TEXT[weapon["name"]].to_s.gsub("\n", " ")
+      weapon_stars    = weapon["grade"].to_i
+      weapon_class    = weapon["categoryid"].to_s.gsub("CAT_", "").capitalize
+      weapon_slot1    = weapon["convert_slot_1"].to_s.capitalize
+      weapon_slot2    = weapon["convert_slot_2"].to_s.capitalize
+      weapon_slot3    = weapon["convert_slot_3"].to_s.capitalize
+      weapon_attack   = weapon["attdmg"].to_i
+      weapon_speed    = weapon["attspd"].to_f.round(1)
+      weapon_howtoget = Array(weapon["howtoget"]).join(", ")
+      weapon_bound_to = weapon_bound_to.map { |hero| CQ::TEXT[hero["name"]].to_s.gsub("\n", " ") }
+      weapon_bound_to = weapon_bound_to.join(", ")
+      weapon_desc     = CQ::TEXT[weapon["desc"]].to_s.gsub("\n", " ")
+
+      message = "#{weapon_name}" +
+        " | #{weapon_stars}☆ #{weapon_class}" +
+        " | Slots - #{weapon_slot1} #{weapon_slot2} #{weapon_slot3}" +
+        " | Atk Power - #{weapon_attack}" +
+        " | Atk Speed - #{weapon_speed}" +
+        " | How to Get - #{weapon_howtoget}"
+
+      message << " | Bound To - #{weapon_bound_to}" unless weapon_bound_to.empty?
+      message << " | Ability - #{weapon_desc}" unless weapon_desc.empty?
+
+      message
     end
 
     # Calculate all stats for a hero with the given data
