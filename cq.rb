@@ -44,7 +44,7 @@ class CQ
   # Get a list of names of a type of data. Returns first 50 results if over 50 results.
   # Can query with regex.
   #
-  # Usage: !find (berry|bread|hero|skill) query
+  # Usage: !find (berry|bread|hero|skill|weapon) query
   # Examples:
   #   !find hero vesper
   #   !find skill goddess
@@ -53,7 +53,7 @@ class CQ
   def cmd_find(m, type, query)
     message_on_error(m) do
       if query.nil?
-        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !find (berry|bread|hero|skill) query")
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !find (berry|bread|hero|skill|weapon) query")
         return
       end
 
@@ -66,9 +66,11 @@ class CQ
                   find_heroes_by_name(query)
                 when "skill"
                   find_skills_by_name(query)
+                when "weapon"
+                  find_weapons_by_name_or_bound_to(query)
                 end
 
-      message = results ? formatted_find_message(type, query, results) : "Error - Unknown type: #{type} | Available types - berry, bread, hero, skill"
+      message = results ? formatted_find_message(type, query, results) : "Error - Unknown type: #{type} | Available types - berry, bread, hero, skill, weapon"
       m.reply("#{m.user.nick}: #{message}")
     end
   end

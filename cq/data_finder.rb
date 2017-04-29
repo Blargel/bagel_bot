@@ -9,7 +9,7 @@ class CQ
     # Returns an array of matching text.
     def find_text(text)
       regex = string_to_regex(text)
-      regex ? find_text_by_regex(regex) : find_text_by_substring(text)
+      regex ? find_text_by_regex(regex) : find_text_by_substring(text.downcase)
     end
 
     # Finds text whose id or content contains a given substring.
@@ -18,7 +18,7 @@ class CQ
       matching_texts = []
 
       CQ::TEXT.each do |k, v|
-        if k.to_s.downcase.include?(text.downcase) || v.to_s.downcase.include?(text.downcase)
+        if k.to_s.downcase.include?(text.downcase) || v.to_s.downcase.include?(text)
           matching_texts << [k, v]
         end
       end
@@ -66,7 +66,7 @@ class CQ
     # Returns an array of matching hero hashes.
     def find_heroes_by_name(query)
       regex = string_to_regex(query)
-      regex ? find_heroes_by_name_regex(regex) : find_heroes_by_name_substring(query)
+      regex ? find_heroes_by_name_regex(regex) : find_heroes_by_name_substring(query.downcase)
     end
 
     # Finds heroes whose names match a given substring.
@@ -79,7 +79,6 @@ class CQ
     #   5. All other matches
     def find_heroes_by_name_substring(substr)
       hero_data = get_data("character_visual")
-      substr = substr.downcase
 
       exact_matches        = []
       exact_word_matches   = []
@@ -148,7 +147,7 @@ class CQ
     # Returns an array of matching berry hashes.
     def find_berries_by_name(query)
       regex = string_to_regex(query)
-      regex ? find_berries_by_name_regex(regex) : find_berries_by_name_substring(query)
+      regex ? find_berries_by_name_regex(regex) : find_berries_by_name_substring(query.downcase)
     end
 
     # Finds berries whose names contain a given substring.
@@ -156,7 +155,7 @@ class CQ
     def find_berries_by_name_substring(substr)
       berry_data = get_data("addstatitem")
       berry_data.keep_if do |berry|
-        CQ::TEXT[berry["name"]].to_s.downcase.include?(substr.downcase)
+        CQ::TEXT[berry["name"]].to_s.downcase.include?(substr)
       end
     end
 
@@ -174,7 +173,7 @@ class CQ
     # Returns an array of matching weapon hashes.
     def find_weapons_by_name(query)
       regex = string_to_regex(query)
-      regex ? find_weapons_by_name_regex(regex) : find_weapons_by_name_substring(query)
+      regex ? find_weapons_by_name_regex(regex) : find_weapons_by_name_substring(query.downcase)
     end
 
     # Finds weapons whose names contain a given substring.
@@ -182,7 +181,7 @@ class CQ
     def find_weapons_by_name_substring(substr)
       weapon_data = get_data("weapon")
       weapon_data.keep_if do |weapon|
-        weapon["type"] == "HERO" && CQ::TEXT[weapon["name"]].to_s.downcase.include?(substr.downcase)
+        weapon["type"] == "HERO" && CQ::TEXT[weapon["name"]].to_s.downcase.include?(substr)
       end
     end
 
@@ -193,6 +192,58 @@ class CQ
       weapon_data.keep_if do |weapon|
         weapon["type"] == "HERO" && CQ::TEXT[weapon["name"]].to_s =~ regex
       end
+    end
+
+    # Finds weapons whose names or bounded to hero's names match a given query.
+    # Checks if the query can be converted to a regex and sends to the appropriate method.
+    # Returns an array of matching weapon hashes.
+    def find_weapons_by_name_or_bound_to(query)
+      regex = string_to_regex(query)
+      regex ? find_weapons_by_name_or_bound_to_regex(regex) : find_weapons_by_name_or_bound_to_substring(query.downcase)
+    end
+
+    # Finds weapons whose names or bounded to hero's names contain a given substring.
+    # Returns an array of matching weapon hashes.
+    def find_weapons_by_name_or_bound_to_substring(substr)
+      weapon_data = get_data("weapon")
+
+      matched_hero_ids = find_heroes_by_name_substring(substr).map { |hero| hero["id"] }
+
+      weapon_name_matches  = []
+      bounded_name_matches = []
+      weapon_data.each do |weapon|
+        next unless weapon["type"] == "HERO"
+
+        if weapon["reqhero"] && !(weapon["reqhero"] & matched_hero_ids).empty?
+          bounded_name_matches << weapon
+        elsif CQ::TEXT[weapon["name"]].to_s.downcase.include?(substr)
+          weapon_name_matches << weapon
+        end
+      end
+
+      (bounded_name_matches + weapon_name_matches).uniq
+    end
+
+    # Finds weapons whose names or bounded to hero's names match a given regex.
+    # Returns an array of matching weapon hashes.
+    def find_weapons_by_name_or_bound_to_regex(regex)
+      weapon_data = get_data("weapon")
+
+      matched_hero_ids = find_heroes_by_name_regex(regex).map { |hero| hero["id"] }
+
+      weapon_name_matches  = []
+      bounded_name_matches = []
+      weapon_data.each do |weapon|
+        next unless weapon["type"] == "HERO"
+
+        if weapon["reqhero"] && !(weapon["reqhero"] & matched_hero_ids).empty?
+          bounded_name_matches << weapon
+        elsif CQ::TEXT[weapon["name"]].to_s =~ regex
+          weapon_name_matches << weapon
+        end
+      end
+
+      (bounded_name_matches + weapon_name_matches).uniq
     end
 
     # Finds skills whose names match a given query.
