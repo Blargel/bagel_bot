@@ -4,6 +4,7 @@ require 'cinch'
 require 'cinch/plugins/identify'
 require 'yaml'
 require './cq'
+require './pick'
 require './slap'
 
 config = YAML.load_file("./config.yml")
@@ -21,6 +22,7 @@ bot = Cinch::Bot.new do
     c.plugins.plugins = [
       Cinch::Plugins::Identify,
       CQ,
+      Pick,
       Slap
     ]
 

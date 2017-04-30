@@ -7,7 +7,6 @@ class Slap
 
   match(/slap(?:$|(?: (.+)?))/)
   def execute(m, target)
-    return if m.user.nick.downcase.include?("discord")
     target ||= "himself"
     fish = random_fish
     vowel_start = "aeiou".include?(fish[0])
