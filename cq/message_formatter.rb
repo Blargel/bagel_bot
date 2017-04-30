@@ -108,14 +108,14 @@ class CQ
                    end
 
       "Level #{level} #{hero_name} +#{bread}#{berry_text}" +
-        " - #{stats[:ha].round(1)} Atk Power" +
-        " | #{stats[:hp].round(1)} HP" +
-        " | #{(stats[:cc]*100).round(1)} Crit Chance" +
-        " | #{stats[:arm].round(1)} Armor" +
-        " | #{stats[:res].round(1)} Resistance" +
-        " | #{(stats[:cd]*100).round(1)} Crit Dmg" +
-        " | #{(stats[:acc]*100).round(1)} Accuracy" +
-        " | #{(stats[:eva]*100).round(1)} Evasion"
+        " - #{stats["ha"].round(1)} Atk Power" +
+        " | #{stats["hp"].round(1)} HP" +
+        " | #{(stats["cc"]*100).round(1)} Crit Chance" +
+        " | #{stats["arm"].round(1)} Armor" +
+        " | #{stats["res"].round(1)} Resistance" +
+        " | #{(stats["cd"]*100).round(1)} Crit Dmg" +
+        " | #{(stats["acc"]*100).round(1)} Accuracy" +
+        " | #{(stats["eva"]*100).round(1)} Evasion"
     end
 
     # Message formatter for the !skill command
@@ -215,18 +215,186 @@ class CQ
       message
     end
 
+    # Message formatter for the !highscore command with no params
+    def formatted_highscore_message(heroes, hero_stats, berry_stats)
+      reg_stats = ["ha", "hp", "cc", "arm", "res", "cd", "acc", "eva"]
+      berry_stat_names = {
+        "berryha" => "attack_power",
+        "berryhp" => "hp",
+        "berrycc" => "critical_chance",
+        "berryarm" => "armor",
+        "berryres" => "resistance",
+        "berrycd" => "critical_damage",
+        "berryacc" => "accuracy",
+        "berryeva" => "dodge"
+      }
+
+      top_stats = {}
+      hero_stats.each do |hero_stat|
+        berry_stat = berry_stats.find { |b| b["id"] == hero_stat["addstat_max_id"] }
+        calc_stats = calculate_stats(60, 5, true, hero_stat, berry_stat)
+
+        reg_stats.each do |s|
+          if top_stats[s].nil? || top_stats[s]["value"] < calc_stats[s]
+            hero = heroes.find { |h| h["default_stat_id"] ==  hero_stat["id"] }
+
+            top_stats[s] = {
+              "hero" => CQ::TEXT[hero["name"]],
+              "value" => calc_stats[s]
+            }
+          end
+        end
+
+        berry_stat_names.each do |k, v|
+          if top_stats[k].nil? || top_stats[k]["value"] < berry_stat[v]
+            hero = heroes.find { |h| h["default_stat_id"] ==  hero_stat["id"] }
+
+            top_stats[k] = {
+              "hero" => CQ::TEXT[hero["name"]],
+              "value" => berry_stat[v]
+            }
+          end
+        end
+      end
+
+      "Atk Power - #{top_stats["ha"]["hero"]} #{top_stats["ha"]["value"].round(1)}" +
+        " | HP - #{top_stats["hp"]["hero"]} #{top_stats["hp"]["value"].round(1)}" +
+        " | Crit Chance - #{top_stats["cc"]["hero"]} #{(top_stats["cc"]["value"]*100).round(1)}" +
+        " | Armor - #{top_stats["arm"]["hero"]} #{top_stats["arm"]["value"].round(1)}" +
+        " | Resistance - #{top_stats["res"]["hero"]} #{top_stats["res"]["value"].round(1)}" +
+        " | Crit Dmg - #{top_stats["cd"]["hero"]} #{(top_stats["cd"]["value"]*100).round(1)}" +
+        " | Accuracy - #{top_stats["acc"]["hero"]} #{(top_stats["acc"]["value"]*100).round(1)}" +
+        " | Evasion - #{top_stats["eva"]["hero"]} #{(top_stats["eva"]["value"]*100).round(1)}"+
+        "\nBerry Atk Power - #{top_stats["berryha"]["hero"]} #{top_stats["berryha"]["value"].round(1)}" +
+        " | Berry HP - #{top_stats["berryhp"]["hero"]} #{top_stats["berryhp"]["value"].round(1)}" +
+        " | Berry Crit Chance - #{top_stats["berrycc"]["hero"]} #{(top_stats["berrycc"]["value"]*100).round(1)}" +
+        " | Berry Armor - #{top_stats["berryarm"]["hero"]} #{top_stats["berryarm"]["value"].round(1)}" +
+        " | Berry Resistance - #{top_stats["berryres"]["hero"]} #{top_stats["berryres"]["value"].round(1)}" +
+        " | Berry Crit Dmg - #{top_stats["berrycd"]["hero"]} #{(top_stats["berrycd"]["value"]*100).round(1)}" +
+        " | Berry Accuracy - #{top_stats["berryacc"]["hero"]} #{(top_stats["berryacc"]["value"]*100).round(1)}" +
+        " | Berry Evasion - #{top_stats["berryeva"]["hero"]} #{(top_stats["berryeva"]["value"]*100).round(1)}"
+    end
+
+    # Message formatter for the !highscore command_with the stat specified
+    def fomatted_highscore_stat_message(heroes, hero_stats, berry_stats, stat)
+      reg_stat_names = ["ha", "hp", "cc", "arm", "res", "cd", "acc", "eva"]
+      berry_stat_names = {
+        "berryha" => "attack_power",
+        "berryhp" => "hp",
+        "berrycc" => "critical_chance",
+        "berryarm" => "armor",
+        "berryres" => "resistance",
+        "berrycd" => "critical_damage",
+        "berryacc" => "accuracy",
+        "berryeva" => "dodge"
+      }
+      valid_stats = reg_stat_names + berry_stat_names.keys
+      return "Error - Invalid stat: #{stat}. Valid stats: #{valid_stats.join(", ")}" unless valid_stats.include?(stat.downcase)
+
+      top_stats = []
+      hero_stats.each do |hero_stat|
+        hero = heroes.find { |h| h["default_stat_id"] ==  hero_stat["id"] }
+        berry_stat = berry_stats.find { |b| b["id"] == hero_stat["addstat_max_id"] }
+
+        value = nil
+        if reg_stat_names.include?(stat)
+          calc_stats = calculate_stats(60, 5, true, hero_stat, berry_stat)
+          value = calc_stats[stat]
+          value *= 100 if ["cc", "cd", "acc", "eva"].include?(stat)
+        else
+          value = berry_stat[berry_stat_names[stat]]
+          value *= 100 if ["berrycc", "berrycd", "berryacc", "berryeva"].include?(stat)
+        end
+
+        top_stats << {
+          "hero" => CQ::TEXT[hero["name"]],
+          "value" => value.round(1)
+        }
+      end
+      top_stats.sort! { |a, b| b["value"] <=> a["value"] }
+      top_stats = top_stats.first(10)
+
+      "#{top_stats[0]["hero"]} #{top_stats[0]["value"]}" +
+        " | #{top_stats[1]["hero"]} #{top_stats[1]["value"]}" +
+        " | #{top_stats[2]["hero"]} #{top_stats[2]["value"]}" +
+        " | #{top_stats[3]["hero"]} #{top_stats[3]["value"]}" +
+        " | #{top_stats[4]["hero"]} #{top_stats[4]["value"]}" +
+        " | #{top_stats[5]["hero"]} #{top_stats[5]["value"]}" +
+        " | #{top_stats[6]["hero"]} #{top_stats[6]["value"]}" +
+        " | #{top_stats[7]["hero"]} #{top_stats[7]["value"]}" +
+        " | #{top_stats[8]["hero"]} #{top_stats[8]["value"]}" +
+        " | #{top_stats[9]["hero"]} #{top_stats[9]["value"]}"
+    end
+
+    # Message formatter for the !highscore command with stat and class specified
+    def formatted_highscore_stat_class_message(heroes, hero_stats, berry_stats, stat, hero_class)
+      reg_stat_names = ["ha", "hp", "cc", "arm", "res", "cd", "acc", "eva"]
+      berry_stat_names = {
+        "berryha" => "attack_power",
+        "berryhp" => "hp",
+        "berrycc" => "critical_chance",
+        "berryarm" => "armor",
+        "berryres" => "resistance",
+        "berrycd" => "critical_damage",
+        "berryacc" => "accuracy",
+        "berryeva" => "dodge"
+      }
+      valid_stats = reg_stat_names + berry_stat_names.keys
+      valid_classes = ["warrior", "paladin", "archer", "hunter", "wizard", "priest"]
+      return "Error - Invalid stat: #{stat}. Valid stats: #{valid_stats.join(", ")}" unless valid_stats.include?(stat.downcase)
+      return "Error - Invalid class: #{hero_class}. Valid classes: #{valid_classes.join(", ")}" unless valid_classes.include?(hero_class.downcase)
+
+      hero_class = "CLA_" + hero_class.upcase
+
+      top_stats = []
+      hero_stats.each do |hero_stat|
+        hero = heroes.find { |h| h["default_stat_id"] ==  hero_stat["id"] }
+        next unless hero["classid"] == hero_class
+
+        berry_stat = berry_stats.find { |b| b["id"] == hero_stat["addstat_max_id"] }
+
+        value = nil
+        if reg_stat_names.include?(stat)
+          calc_stats = calculate_stats(60, 5, true, hero_stat, berry_stat)
+          value = calc_stats[stat]
+          value *= 100 if ["cc", "cd", "acc", "eva"].include?(stat)
+        else
+          value = berry_stat[berry_stat_names[stat]]
+          value *= 100 if ["berrycc", "berrycd", "berryacc", "berryeva"].include?(stat)
+        end
+
+        top_stats << {
+          "hero" => CQ::TEXT[hero["name"]],
+          "value" => value.round(1)
+        }
+      end
+      top_stats.sort! { |a, b| b["value"] <=> a["value"] }
+      top_stats = top_stats.first(10)
+
+      "#{top_stats[0]["hero"]} #{top_stats[0]["value"]}" +
+        " | #{top_stats[1]["hero"]} #{top_stats[1]["value"]}" +
+        " | #{top_stats[2]["hero"]} #{top_stats[2]["value"]}" +
+        " | #{top_stats[3]["hero"]} #{top_stats[3]["value"]}" +
+        " | #{top_stats[4]["hero"]} #{top_stats[4]["value"]}" +
+        " | #{top_stats[5]["hero"]} #{top_stats[5]["value"]}" +
+        " | #{top_stats[6]["hero"]} #{top_stats[6]["value"]}" +
+        " | #{top_stats[7]["hero"]} #{top_stats[7]["value"]}" +
+        " | #{top_stats[8]["hero"]} #{top_stats[8]["value"]}" +
+        " | #{top_stats[9]["hero"]} #{top_stats[9]["value"]}"
+    end
+
     # Calculate all stats for a hero with the given data
     def calculate_stats(level, bread, berry, hero_stats, berry_stats)
       berry = berry_stats && berry
       {
-        :ha  => calculate_stat(level, bread, hero_stats["initialattdmg"], hero_stats["growthattdmg"],  berry ? berry_stats["attack_power"] : 0),
-        :hp  => calculate_stat(level, bread, hero_stats["initialhp"],     hero_stats["growthhp"],      berry ? berry_stats["hp"] : 0),
-        :cc  => calculate_stat(level, 0,     hero_stats["critprob"],      0,                           berry ? berry_stats["critical_chance"] : 0),
-        :arm => calculate_stat(level, bread, hero_stats["defense"],       hero_stats["growthdefense"], berry ? berry_stats["armor"] : 0),
-        :res => calculate_stat(level, bread, hero_stats["resist"],        hero_stats["growthresist"],  berry ? berry_stats["resistance"] : 0),
-        :cd  => calculate_stat(level, 0,     hero_stats["critpower"],     0,                           berry ? berry_stats["critical_damage"] : 0),
-        :acc => calculate_stat(level, 0,     hero_stats["hitrate"],       0,                           berry ? berry_stats["accuracy"] : 0),
-        :eva => calculate_stat(level, 0,     hero_stats["dodgerate"],     0,                           berry ? berry_stats["dodge"] : 0)
+        "ha"  => calculate_stat(level, bread, hero_stats["initialattdmg"], hero_stats["growthattdmg"], berry ? berry_stats["attack_power"] : 0),
+        "hp"  => calculate_stat(level, bread, hero_stats["initialhp"], hero_stats["growthhp"], berry ? berry_stats["hp"] : 0),
+        "cc"  => hero_stats["critprob"] + (berry ? berry_stats["critical_chance"] : 0),
+        "arm" => calculate_stat(level, bread, hero_stats["defense"], hero_stats["growthdefense"], berry ? berry_stats["armor"] : 0),
+        "res" => calculate_stat(level, bread, hero_stats["resist"], hero_stats["growthresist"], berry ? berry_stats["resistance"] : 0),
+        "cd"  => hero_stats["critpower"] + (berry ? berry_stats["critical_damage"] : 0),
+        "acc" => hero_stats["hitrate"] + (berry ? berry_stats["accuracy"] : 0),
+        "eva" => hero_stats["dodgerate"] + (berry ? berry_stats["dodge"] : 0)
       }
     end
 

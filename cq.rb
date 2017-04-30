@@ -317,6 +317,40 @@ class CQ
     end
   end
 
+  # Find the heroes with the highest stats. Optionally restrict it to one stat and/or class.
+  # List of valid stats:
+  #   ha, hp, cc, arm, res, cd, acc, eva,
+  #   berryha, berryhp, berrycc, berryarm,
+  #   berryres, berrycd, berryacc, berryeva
+  # List of valid classes:
+  #   warrior, paladin, archer, hunter, wizard, priest
+  #
+  # Usage: !highscore [stat [class]]
+  # Examples:
+  #   !highscore
+  #   !highscore ha
+  #   !highscore ha priest
+  match(/highscore(?:$|(?: (\S+)?(?:$| (.+)?)))/, method: :cmd_highscore)
+  def cmd_highscore(m, stat, hero_class)
+    message_on_error(m) do
+      hero_stats = get_data("character_stat").keep_if { |hero_stat| hero_stat["addstat_max_id"] }
+      hero_stat_ids = hero_stats.map { |hero_stat| hero_stat["id"] }
+
+      heroes = get_data("character_visual").keep_if { |hero| hero_stat_ids.include?(hero["default_stat_id"]) }
+      berry_stats = get_data("character_addstatmax")
+
+      message = if hero_class
+                  formatted_highscore_stat_class_message(heroes, hero_stats, berry_stats, stat, hero_class)
+                elsif stat
+                  fomatted_highscore_stat_message(heroes, hero_stats, berry_stats, stat)
+                else
+                  formatted_highscore_message(heroes, hero_stats, berry_stats)
+                end
+
+      m.reply("#{m.user.nick}: #{message}")
+    end
+  end
+
   # All commands should be run through this so that it reports back to the user and
   # pings me if an error occurs
   def message_on_error(m, &block)
