@@ -9,13 +9,23 @@ class Slap
   def execute(m, target)
     target ||= "himself"
     fish = random_fish
-    vowel_start = "aeiou".include?(fish[0])
 
-    m.reply("#{m.user.nick} slaps #{target.strip} around a bit with #{vowel_start ? "an" : "a"} #{fish}.")
+    if ["blargel", "largebagel"].include?(target.downcase.strip)
+      m.action_reply("counter slaps #{m.user.nick} with #{fish} for trying to slap its master.")
+      return
+    end
+
+    if "bagelbot" == target.downcase.strip
+      m.action_reply("counter slaps #{m.user.nick} with #{fish} for trying to slap it.")
+      return
+    end
+
+    m.reply("#{m.user.nick} slaps #{target.strip} around a bit with #{fish}.")
   end
 
   def random_fish
-    ALL_FISH.sample
+    fish = ALL_FISH.sample
+    ("aeiou".include?(fish) ? "an " : "a ") + ALL_FISH.sample
   end
 
   ALL_FISH = [

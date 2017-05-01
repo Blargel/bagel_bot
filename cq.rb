@@ -310,7 +310,7 @@ class CQ
 
       weapons = find_weapons_by_name(query.strip)
       weapon = stars ? weapons.find { |w| w["grade"] == stars } : weapons.first
-      bound_to = find_heroes_by_ids(Array(weapon["reqhero"]))
+      bound_to = find_heroes_by_ids(Array(weapon["reqhero"])) if weapon
 
       message = formatted_weapon_message(query, stars, weapon, bound_to)
       m.reply("#{m.user.nick}: #{message}")
@@ -347,6 +347,94 @@ class CQ
                   formatted_highscore_message(heroes, hero_stats, berry_stats)
                 end
 
+      m.reply("#{m.user.nick}: #{message}")
+    end
+  end
+
+  # Get data about a stage.
+  #
+  # Usage: !stage shorthand
+  # Examples:
+  #   !stage 1-1n
+  #   !stage 6-30h
+  #   !stage 7-3-2n
+  match(/stage(?:$|(?: (.+)?))/, method: :cmd_stage)
+  def cmd_stage(m, opts)
+    message_on_error(m) do
+      if opts.nil?
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !stage code")
+        return
+      end
+
+      unless opts.strip =~ /\d\-\d\d?(?:\-\d\d?)?n|h/i
+        m.reply("#{m.user.nick}: Invalid stage code format. Use a format like 6-30H or 7-1-8N")
+        return
+      end
+
+      hard = opts[-1].downcase == "h"
+      code = opts.chop.split("-")
+
+      if (code.first == "7" && code.length != 3) || (code.first != "7" && code.length != 2)
+        return "Error - Invalid stage: #{code}"
+      end
+
+      stage_num = code.last
+      chapter = case code.first
+                when "1"
+                  "FOREST"
+                when "2"
+                  "DESERT"
+                when "3"
+                  "SEA"
+                when "4"
+                  "VOLCANO"
+                when "5"
+                  "TUNDRA"
+                when "6"
+                  "BATTLE_FIELD"
+                when "7"
+                  "SAINT_" + code[1]
+                end
+
+      stage_id = "STAGE_#{chapter}_#{"HARD_" if  hard}#{stage_num}"
+      stage = find_stage_by_id(stage_id)
+      waves = find_waves_by_stage_id(stage_id)
+
+      enemy_ids = []
+      waves.each do |wave|
+        wave["enemy"].each do |enemy|
+          enemy_ids << enemy["id"]
+        end
+      end
+      enemies = find_enemies_by_ids(enemy_ids.uniq)
+
+      message = formatted_stage_message(opts.strip, stage, waves, enemies)
+      m.reply("#{m.user.nick}: #{message}")
+    end
+  end
+
+  # Get the stats of a monster at specified level.
+  # Can query with regex.
+  #
+  # Usage: !monstats query level
+  # Examples:
+  #   !monstats el thalnos 135
+  #   !monstats /b.*ogre/i 128
+  match(/mon(?:ster)?stats(?:$|(?: (.+)?))/, method: :cmd_monstats)
+  def cmd_monstats(m, opts)
+    message_on_error(m) do
+      if opts.nil? || !opts.include?(" ")
+        m.reply("#{m.user.nick}: Error - Missing parameters! | Usage - !monsterstats query level")
+        return
+      end
+
+      opts  = opts.strip.split
+      level = opts.pop
+      query = opts.join(" ")
+
+      monster, monster_stats = find_monster_and_stats(query)
+
+      message = formatted_monstats_message(query, level, monster, monster_stats)
       m.reply("#{m.user.nick}: #{message}")
     end
   end

@@ -39,9 +39,13 @@ bot = Cinch::Bot.new do
       "!commands",
       "!find",
       "!hero",
+      "!monstats",
+      "!monsterstats",
       "!passive",
+      "!pick",
       "!skill",
       "!slap",
+      "!stage",
       "!stats",
       "!text",
       "!weapon"

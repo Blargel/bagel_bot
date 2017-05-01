@@ -50,13 +50,13 @@ class CQ
       if stars
         hero_stats = nil
         hero = heroes.find do |h|
-                 hero_stats = find_hero_stats_by_id(h["default_stat_id"])
+                 hero_stats = find_stats_by_id(h["default_stat_id"])
                  hero_stats["grade"] == stars
                end
         return if hero.nil?
         [hero, hero_stats]
       else
-        hero_stats = find_hero_stats_by_id(heroes.first["default_stat_id"])
+        hero_stats = find_stats_by_id(heroes.first["default_stat_id"])
         [heroes.first, hero_stats]
       end
     end
@@ -126,7 +126,7 @@ class CQ
 
     # Finds one stat hash via a given stat id.
     # Returns a matching stat hash or nil.
-    def find_hero_stats_by_id(stat_id)
+    def find_stats_by_id(stat_id)
       stats_data = get_data("character_stat")
       stats_data.find do |stats|
         stats["id"] == stat_id
@@ -295,6 +295,98 @@ class CQ
       bread_data = get_data("bread")
       bread_data.keep_if do |bread|
         CQ::TEXT[bread["name"]].to_s =~ regex
+      end
+    end
+
+    # Finds a stage by a given stage id
+    # Returns a stage hash or nil
+    def find_stage_by_id(stage_id)
+      stage_data = get_data("stage")
+      stage_data.find do |stage|
+        stage["id"] == stage_id
+      end
+    end
+
+    # Finds enemy waves of a stage by a given stage id
+    # Returns an array of wave hashes.
+    def find_waves_by_stage_id(stage_id)
+      wave_data = get_data("wave")
+      wave_data.keep_if do |wave|
+        wave["stage_id"] == stage_id
+      end
+    end
+
+    # Finds enemies by an array of enemy ids.
+    # Returns an array of enemy hashes.
+    def find_enemies_by_ids(enemy_ids)
+      enemy_data = get_data("character_visual")
+      enemy_data.keep_if do |enemy|
+        enemy_ids.include?(enemy["id"]) && ["BOSS", "MONSTER"].include?(enemy["type"])
+      end
+    end
+
+    # Finds a monster whose name matches a given query and star level.
+    # Returns a monster hash and a matching stat hash.
+    def find_monster_and_stats(query)
+      monsters = find_monsters_by_name(query)
+
+      return if monsters.empty?
+
+      monster_stats = find_stats_by_id(monsters.first["default_stat_id"])
+      [monsters.first, monster_stats]
+    end
+
+    # Finds monsters whose names match a given query.
+    # Checks if the query can be converted to a regex and sends to the appropriate method.
+    # Returns an array of matching monster hashes.
+    def find_monsters_by_name(query)
+      regex = string_to_regex(query)
+      regex ? find_monsters_by_name_regex(regex) : find_monsters_by_name_substring(query.downcase)
+    end
+
+    # Finds monsters whose names match a given substring.
+    # Returns an array of matching monster hashes.
+    # The order of the array is determined by how the substring was matched:
+    #   1. Exact string match
+    #   2. Exact word match
+    #   3. Start of string match
+    #   4. Start of word match
+    #   5. All other matches
+    def find_monsters_by_name_substring(substr)
+      monster_data = get_data("character_visual")
+
+      exact_matches        = []
+      exact_word_matches   = []
+      string_start_matches = []
+      word_start_matches   = []
+      other_matches        = []
+      monster_data.each do |monster|
+        next unless ["MONSTER", "BOSS"].include?(monster["type"])
+
+        monster_name = CQ::TEXT[monster["name"]].to_s.downcase
+
+        if monster_name == substr
+          exact_matches << monster
+        elsif monster_name =~ /(^|\s)#{Regexp.quote(substr)}($|\s)/
+          exact_word_matches << monster
+        elsif monster_name =~ /^#{Regexp.quote(substr)}/
+          string_start_matches << monster
+        elsif monster_name =~ /\s#{Regexp.quote(substr)}/
+          word_start_matches << monster
+        elsif monster_name.include?(substr)
+          other_matches << monster
+        end
+      end
+
+      exact_matches + exact_word_matches + string_start_matches + word_start_matches + other_matches
+    end
+
+    # Finds monsters whose names match a given regex.
+    # Returns an array of matching monster hashes.
+    def find_monsters_by_name_regex(regex)
+      monster_data = get_data("character_visual")
+      monster_data.keep_if do |monster|
+        ["MONSTER", "BOSS"].include?(monster["type"]) && CQ::TEXT[monster["name"]].to_s =~ regex
       end
     end
 

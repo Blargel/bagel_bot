@@ -107,8 +107,8 @@ class CQ
                      ""
                    end
 
-      "Level #{level} #{hero_name} +#{bread}#{berry_text}" +
-        " - #{stats["ha"].round(1)} Atk Power" +
+      "Lvl #{level} #{hero_name} +#{bread}#{berry_text}" +
+        " | #{stats["ha"].round(1)} Atk Power" +
         " | #{stats["hp"].round(1)} HP" +
         " | #{(stats["cc"]*100).round(1)} Crit Chance" +
         " | #{stats["arm"].round(1)} Armor" +
@@ -129,7 +129,7 @@ class CQ
       skill_cost  = skill["cost"].map { |resource| "#{resource["value"]} #{resource["type"].capitalize}" }
       skill_cost  = skill_cost.join(", ")
 
-      "#{skill_name} Level #{skill_level}" +
+      "#{skill_name} Lvl #{skill_level}" +
         " | Great - #{skill_great}" +
         " | Cost - #{skill_cost}" +
         " | Description - #{skill_desc}"
@@ -381,6 +381,63 @@ class CQ
         " | #{top_stats[7]["hero"]} #{top_stats[7]["value"]}" +
         " | #{top_stats[8]["hero"]} #{top_stats[8]["value"]}" +
         " | #{top_stats[9]["hero"]} #{top_stats[9]["value"]}"
+    end
+
+    # Message formatter for the !stage command
+    def formatted_stage_message(code, stage, waves, enemies)
+      return "Error - Invalid stage: #{code}" if stage.nil?
+
+      stage_name = CQ::TEXT[stage["name"]].to_s.gsub("\n", " ")
+      meat = stage["heartneed"]
+      min_bread_grade = stage["dropable_bread_type"]["min_grade"]
+      max_bread_grade = stage["dropable_bread_type"]["max_grade"]
+      bread_grade = min_bread_grade == -1 ? "None" : "#{min_bread_grade}~#{max_bread_grade}☆"
+      min_weapon_grade = stage["dropable_weapon_type"]["min_grade"]
+      max_weapon_grade = stage["dropable_weapon_type"]["max_grade"]
+      weapon_grade = min_weapon_grade == -1 ? "None" : "#{min_weapon_grade}~#{max_weapon_grade}☆"
+      weapon_types = stage["dropable_weapon_type"]["classids"].map { |class_id| class_id.gsub("CAT_", "").capitalize }
+
+      enemy_names_and_levels = []
+
+      waves.each do |wave|
+        wave["enemy"].each do |wave_enemy|
+          e = enemies.find {|enemy| enemy["id"] == wave_enemy["id"]}
+          enemy_names_and_levels << "Lvl #{wave_enemy["level"] || 1} #{CQ::TEXT[e["name"]]}"
+        end
+      end
+
+      enemy_names_and_levels.uniq!
+
+      "#{stage_name}" +
+        " | Cost - #{meat} meat" +
+        " | Dropped Bread - #{bread_grade}" +
+        " | Dropped Weapons - #{weapon_grade} #{weapon_types.join(", ")}" +
+        " | Enemies - #{enemy_names_and_levels.join (", ")}"
+    end
+
+    # Message formatter for the !monstats command
+    def formatted_monstats_message(query, level, monster, monster_stats)
+      return "No monsters's name matches \"#{query}\"!" if monster_stats.nil?
+      return "Error - Invalid level: #{level}" if level.to_i < 1 || level.to_i.to_s != level
+
+      monster_name  = CQ::TEXT[monster["name"]].to_s.gsub("\n", " ")
+      regular_stats = calculate_stats(level.to_i, 0, false, monster_stats, nil)
+      armor_pen = monster_stats["penetratedef"]
+      resist_pen = monster_stats["penetraterst"]
+      damage_redux = monster_stats["dmgreduce"]
+
+      "Lvl #{level} #{monster_name}" +
+        " | #{regular_stats["ha"].round(1)} Atk Power" +
+        " | #{regular_stats["hp"].round(1)} HP" +
+        " | #{(regular_stats["cc"]*100).round(1)} Crit Chance" +
+        " | #{regular_stats["arm"].round(1)} Armor" +
+        " | #{regular_stats["res"].round(1)} Resistance" +
+        " | #{(regular_stats["cd"]*100).round(1)} Crit Dmg" +
+        " | #{(regular_stats["acc"]*100).round(1)} Accuracy" +
+        " | #{(regular_stats["eva"]*100).round(1)} Evasion" +
+        " | #{armor_pen.round} Armor Penetration" +
+        " | #{resist_pen.round} Resistance Penetration" +
+        " | #{(damage_redux*100).round(1)}% Dmg Reduction"
     end
 
     # Calculate all stats for a hero with the given data
