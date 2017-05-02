@@ -17,7 +17,14 @@ class CQ
     def formatted_find_message(type, query, results)
       return "No #{type} results for \"#{query}\"!" if results.empty?
 
-      names = results.map { |r| TEXT[r["name"]].to_s.gsub("\n", " ") }
+      name_key = case type
+                 when "skin"
+                   "costume_name"
+                 else
+                   "name"
+                 end
+
+      names = results.map { |r| TEXT[r[name_key]].to_s.gsub("\n", " ") }
       names.uniq!
 
       count = names.count
@@ -438,6 +445,35 @@ class CQ
         " | #{armor_pen.round} Armor Penetration" +
         " | #{resist_pen.round} Resistance Penetration" +
         " | #{(damage_redux*100).round(1)}% Dmg Reduction"
+    end
+
+    # Message formatter for the !skin command
+    def formatted_skin_message(query, skin)
+      return "No skin's name matches \"#{query}\"!" if skin.nil?
+
+      skin_name = CQ::TEXT[skin["costume_name"]].to_s.gsub("\n", " ")
+      skin_sell = skin["sell_price"]
+      skin_stats = skin["addstat_json"].map do |stat|
+        stat_type = case stat["Type"]
+                    when "AttackPower"
+                      "Atk Power"
+                    when "CriticalDamage"
+                      "Crit Dmg"
+                    when "CriticalChance"
+                      "Crit Chance"
+                    when "Dodge"
+                      "Evasion"
+                    else
+                      stat["Type"]
+                    end
+        stat_value = stat["Value"]
+        stat_value *= 100 if ["Crit Chance", "Crit Dmg", "Accuracy", "Evasion", "All"].include?(stat_type)
+        "#{stat_value.round(1)}#{"%" if stat_type == "All"} #{stat_type}"
+      end
+
+      "#{skin_name}" +
+        " | Sell Price - #{skin_sell} Gold" +
+        " | Stats - #{skin_stats.join(", ")}"
     end
 
     # Calculate all stats for a hero with the given data

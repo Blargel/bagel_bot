@@ -19,6 +19,7 @@ bot = Cinch::Bot.new do
     c.realname = "BagelBot"
     c.user     = "BagelBot"
 
+    c.plugins.prefix = /^\$/
     c.plugins.plugins = [
       Cinch::Plugins::Identify,
       CQ,
@@ -31,24 +32,25 @@ bot = Cinch::Bot.new do
 
   # Shoving it here because and maintaining it manually because I don't think
   # there's a way for Cinch to know.
-  on :message, /^!commands/ do |m|
+  on :message, /^\$(commands|help)/ do |m|
     commands = [
-      "!berry",
-      "!block",
-      "!bread",
-      "!commands",
-      "!find",
-      "!hero",
-      "!monstats",
-      "!monsterstats",
-      "!passive",
-      "!pick",
-      "!skill",
-      "!slap",
-      "!stage",
-      "!stats",
-      "!text",
-      "!weapon"
+      "$berry",
+      "$block",
+      "$bread",
+      "$commands",
+      "$find",
+      "$help",
+      "$hero",
+      "$monstats",
+      "$monsterstats",
+      "$passive",
+      "$pick",
+      "$skill",
+      "$slap",
+      "$stage",
+      "$stats",
+      "$text",
+      "$weapon"
     ]
     m.reply("#{m.user.nick}: #{commands.join(", ")}")
   end

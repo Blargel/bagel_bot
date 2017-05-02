@@ -390,6 +390,32 @@ class CQ
       end
     end
 
+    # Finds slom whose names match a given query.
+    # Checks if the query can be converted to a regex and sends to the appropriate method.
+    # Returns an array of matching skin hashes.
+    def find_skins_by_name(query)
+      regex = string_to_regex(query)
+      regex ? find_skins_by_name_regex(regex) : find_skins_by_name_substring(query)
+    end
+
+    # Finds skins whose names contain a given substring.
+    # Returns an array of matching skin hashes.
+    def find_skins_by_name_substring(substr)
+      skin_data = get_data("costume")
+      skin_data.keep_if do |skin|
+        CQ::TEXT[skin["costume_name"]].to_s.downcase.include?(substr.downcase)
+      end
+    end
+
+    # Finds skins whose names match a given regex.
+    # Returns an array of matching skin hashes.
+    def find_skins_by_name_regex(regex)
+      skin_data = get_data("costume")
+      skin_data.keep_if do |skin|
+        CQ::TEXT[skin["costume_name"]].to_s =~ regex
+      end
+    end
+
     # Reads a file, converts it to json, and grabs the relevant data within.
     # Returns the converted json data.
     def get_data(type)
