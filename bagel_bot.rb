@@ -3,9 +3,14 @@
 require 'cinch'
 require 'cinch/plugins/identify'
 require 'yaml'
-require './cq'
-require './pick'
-require './slap'
+
+lib = File.expand_path("../plugins", __FILE__)
+$LOAD_PATH.unshift(lib)
+
+require 'calc'
+require 'cq'
+require 'pick'
+require 'slap'
 
 config = YAML.load_file("./config.yml")
 
@@ -19,9 +24,12 @@ bot = Cinch::Bot.new do
     c.realname = "BagelBot"
     c.user     = "BagelBot"
 
+    c.max_messages = 3
+
     c.plugins.prefix = /^\$/
     c.plugins.plugins = [
       Cinch::Plugins::Identify,
+      Calc,
       CQ,
       Pick,
       Slap
@@ -41,6 +49,7 @@ bot = Cinch::Bot.new do
       "$find",
       "$help",
       "$hero",
+      "$highscore",
       "$monstats",
       "$monsterstats",
       "$passive",

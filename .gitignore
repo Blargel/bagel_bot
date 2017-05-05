@@ -1,3 +1,6 @@
 data/**
-config.yml
+db_recreate.rb
+db_repopulate.rb
+
+**/*.yml
 tmtags

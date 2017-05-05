@@ -4,6 +4,7 @@ GEM
     cinch (2.3.3)
     cinch-identify (1.7.0)
       cinch (~> 2.0)
+    dentaku (2.0.10)
     json (2.1.0)
     pg (0.20.0)
     sequel (4.46.0)
@@ -14,6 +15,7 @@ PLATFORMS
 DEPENDENCIES
   cinch
   cinch-identify
+  dentaku
   json
   pg
   sequel

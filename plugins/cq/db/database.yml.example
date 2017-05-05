@@ -1,0 +1,4 @@
+:adapter: postgres
+:host: localhost
+:database: bagel_bot
+:user: username

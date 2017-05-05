@@ -11,13 +11,31 @@ class Slap
     fish = random_fish
 
     if ["blargel", "largebagel"].include?(target.downcase.strip)
-      m.action_reply("counter slaps #{m.user.nick} with #{fish} for trying to slap its master.")
-      return
+      if m.user.nick.downcase == "blargel"
+        m.action_reply("counter slaps Bla-")
+        sleep(1)
+        m.reply("Wait, what...?")
+        sleep(2)
+        m.action_reply("slaps itself in confusion!")
+        bot.part(m.channel, "*KABOOM*")
+        sleep(5)
+        bot.join(m.channel)
+        return
+      else
+        m.action_reply("counter slaps #{m.user.nick} with #{fish} for trying to slap its master.")
+        return
+      end
     end
 
     if "bagelbot" == target.downcase.strip
-      m.action_reply("counter slaps #{m.user.nick} with #{fish} for trying to slap it.")
-      return
+      if m.user.nick.downcase == "blargel"
+        m.action_reply("is slapped by #{m.user.nick} with #{fish}.")
+        m.reply("THANK YOU SIR MAY I HAVE ANOTHER?")
+        return
+      else
+        m.action_reply("counter slaps #{m.user.nick} with #{fish} for trying to slap it.")
+        return
+      end
     end
 
     m.reply("#{m.user.nick} slaps #{target.strip} around a bit with #{fish}.")
