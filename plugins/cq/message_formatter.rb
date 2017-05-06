@@ -155,8 +155,8 @@ class CQ
     def formatted_stage_message(stage)
       "#{stage.name}" +
         " | Cost - #{stage.meat_cost} meat" +
-        " | Dropped Bread - #{stage.min_bread_stars}~#{stage.max_bread_stars}☆" +
-        " | Dropped Weapons - #{stage.min_weapon_stars}~#{stage.max_weapon_stars}☆ #{stage.weapon_types}" +
+        " | Dropped Bread - #{stage.dropped_bread}" +
+        " | Dropped Weapons - #{stage.dropped_weapons}" +
         " | Enemies - #{stage.monster_list.join(", ")}"
     end
 

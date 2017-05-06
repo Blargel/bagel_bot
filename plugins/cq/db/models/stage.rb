@@ -21,5 +21,13 @@ class CQ
         "Lvl #{m[:level]} #{m[:monster].name}"
       end
     end
+
+    def dropped_bread
+      min_bread_stars > 0 ? "#{min_bread_stars}~#{max_bread_stars}☆" : "None"
+    end
+
+    def dropped_weapons
+      !weapon_types.empty? ? "#{min_weapon_stars}~#{max_weapon_stars}☆ #{weapon_types}" : "None"
+    end
   end
 end
