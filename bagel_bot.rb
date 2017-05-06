@@ -53,6 +53,7 @@ bot = Cinch::Bot.new do
       "$berry",
       "$block",
       "$bread",
+      "$calc",
       "$commands",
       "$find",
       "$help",
