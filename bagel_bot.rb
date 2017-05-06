@@ -12,7 +12,15 @@ require 'cq'
 require 'pick'
 require 'slap'
 
-config = YAML.load_file("./config.yml")
+config = YAML.load_file("./config.yml") rescue nil
+
+config ||= {
+  :nickserv => {
+    :type => :nickserv,
+    :username => ENV["NICKSERV_USERNAME"],
+    :password => ENV["NICKSERV_PASSWORD"]
+  } 
+}
 
 bot = Cinch::Bot.new do
   configure do |c|

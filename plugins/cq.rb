@@ -6,7 +6,6 @@ require 'cinch'
 require 'sequel'
 
 class CQ
-  p ENV["DATABASE_URL"]
   DB_CONFIG = ENV["DATABASE_URL"] || YAML.load_file(File.expand_path("../cq/db/database.yml", __FILE__))
   DB = Sequel.connect(DB_CONFIG)
 end
