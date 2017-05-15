@@ -93,6 +93,20 @@ class CQ
         " | Sell Price - #{berry.sell_price}"
     end
 
+    # Message formatter for the !berrystats command
+    def formatted_berrystats_message(hero)
+      "#{hero.name}" +
+        " | Class - #{hero.stars}☆ #{hero.hero_class}" +
+        " | Atk Power - #{hero.berry_ha}" +
+        " | HP - #{hero.berry_hp}" +
+        " | Crit Chance - #{(hero.berry_cc * 100).round(1)}" +
+        " | Armor - #{hero.berry_arm}" +
+        " | Resistance - #{hero.berry_res}" +
+        " | Crit Dmg - #{(hero.berry_cd * 100).round(1)}" +
+        " | Accuracy - #{(hero.berry_acc * 100).round(1)}" +
+        " | Evasion - #{(hero.berry_eva * 100).round(1)}"
+    end
+
     # Message formatter for the !weapon command
     def formatted_weapon_message(weapon)
       message = "#{weapon.name}" +

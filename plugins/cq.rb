@@ -307,6 +307,30 @@ class CQ
     end
   end
 
+  # Get data on the maximum berryable stats on a hero. Returns 6* heroes only.
+  # Can query with regex.
+  #
+  # Usage: $berrystats query
+  # Examples:
+  #   $berrystats rochefort
+  #   $berrystats /a(l|r)tair
+  match(/berrystats(?:$|(?: (.+)?))/, method: :cmd_berrystats)
+  def cmd_berrystats(m, query)
+    message_on_error(m) do
+      raise CQ::Error.new("Missing parameters! | Usage - $berrystats query") unless query
+
+      query.strip!
+      regex = string_to_regex(query)
+
+      heroes = CQ::Hero.filter_stars(6).filter_name(regex || query)
+      hero = heroes.first
+
+      raise CQ::Error.new("No 6☆ hero's name matches \"#{query}\"!") unless hero
+
+      m.reply("#{m.user.nick}: #{formatted_berrystats_message(hero)}")
+    end
+  end
+
   # Get data about a weapon. Optionally pass a star level for the weapon.
   # Can query with regex.
   #

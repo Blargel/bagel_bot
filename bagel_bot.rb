@@ -51,6 +51,7 @@ bot = Cinch::Bot.new do
   on :message, /^\$(commands|help)/ do |m|
     commands = [
       "$berry",
+      "$berrystats",
       "$block",
       "$bread",
       "$calc",
