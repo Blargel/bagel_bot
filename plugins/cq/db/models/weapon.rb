@@ -6,7 +6,7 @@ class CQ
     dataset_module do
       def filter_stars(stars)
         return self unless stars
-        where(:stars => stars)
+        where(Sequel.qualify("weapons", "stars") => stars)
       end
 
       def filter_name(query)
