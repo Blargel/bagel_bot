@@ -19,7 +19,7 @@ config ||= {
     :type => :nickserv,
     :username => ENV["NICKSERV_USERNAME"],
     :password => ENV["NICKSERV_PASSWORD"]
-  } 
+  }
 }
 
 bot = Cinch::Bot.new do

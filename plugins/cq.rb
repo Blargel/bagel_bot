@@ -71,11 +71,11 @@ class CQ
 
       results = case type.downcase
                 when "berry"
-                  CQ::Berry.filter_name(regex || query).all
+                  CQ::Berry.filter_name(regex || query).order_more(:stars).all
                 when "bread"
-                  CQ::Bread.filter_name(regex || query).all
+                  CQ::Bread.filter_name(regex || query).order_more(:stars).all
                 when "hero"
-                  CQ::Hero.filter_name(regex || query).all
+                  CQ::Hero.filter_name(regex || query).order_more(:stars).all
                 when "monster"
                   CQ::Monster.filter_name(regex || query).all
                 when "skill"
@@ -83,9 +83,9 @@ class CQ
                 when "skin"
                   CQ::Skin.filter_name(regex || query).all
                 when "weapon"
-                  CQ::Weapon.filter_name_or_bound_to(regex || query).all
+                  CQ::Weapon.filter_name_or_bound_to(regex || query).order_more(:stars).all
                 else
-                  raise CQ::Error.new("Unknown type: #{type} | Available types - berry, bread, hero, monster, skill, weapon")
+                  raise CQ::Error.new("Unknown type: #{type} | Available types - berry, bread, hero, monster, skill, skin, weapon")
                 end
 
       raise CQ::Error.new("No #{type} results found for \"#{query}\"") if results.empty?
