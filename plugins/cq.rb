@@ -356,6 +356,32 @@ class CQ
     end
   end
 
+  # Get data about an SBW while searching by hero name. Optionally pass a star level for the SBW.
+  # Can query with regex.
+  #
+  # Usage: $sbw query [stars]
+  # Examples:
+  #   $sbw yeowoodong
+  #   $sbw yeowoodong 6
+  match(/sbw(?:$|(?: (.+)?))/, method: :cmd_sbw)
+  def cmd_sbw(m, opts)
+    message_on_error(m) do
+      raise CQ::Error.new("Missing parameters! | Usage - $sbw query [stars]") unless opts
+
+      opts  = opts.strip.split
+      stars = [4,5,6].include?(opts.last.to_i) ? opts.pop.to_i : nil
+      query = opts.join(" ")
+      regex = string_to_regex(query)
+
+      # .all.first because of a bug(?) in Sequel
+      weapon = CQ::Weapon.filter_stars(stars).filter_bound_to(regex || query).all.first
+
+      raise CQ::Error.new("No hero with name matching \"#{query}\" owns a soulbound weapon!") unless weapon
+
+      m.reply("#{m.user.nick}: #{formatted_weapon_message(weapon)}")
+    end
+  end
+
   # Find the heroes with the highest stats. Optionally restrict it to one stat and/or class.
   # List of valid stats:
   #   ha, hp, cc, arm, res, cd, acc, eva,

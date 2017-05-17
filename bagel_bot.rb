@@ -64,6 +64,7 @@ bot = Cinch::Bot.new do
       "$monsterstats",
       "$passive",
       "$pick",
+      "$sbw",
       "$skill",
       "$slap",
       "$stage",

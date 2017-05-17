@@ -26,6 +26,24 @@ class CQ
         where(:name => regex)
       end
 
+      def filter_bound_to(query)
+        if query.kind_of?(Regexp)
+          filter_bound_to_by_regex(query)
+        else
+          filter_bound_to_by_substring(query)
+        end
+      end
+
+      def filter_bound_to_by_substring(substr)
+        regex = Regexp.new(Regexp.quote(substr), true)
+        filter_bound_to_by_regex(regex)
+      end
+
+      def filter_bound_to_by_regex(regex)
+        eager_graph(:heroes)
+          .where(Sequel.qualify("heroes", "name") => regex)
+      end
+
       def filter_name_or_bound_to(query)
         if query.kind_of?(Regexp)
           filter_name_or_bound_to_by_regex(query)
