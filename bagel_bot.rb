@@ -32,7 +32,7 @@ bot = Cinch::Bot.new do
     c.realname = "BagelBot"
     c.user     = "BagelBot"
 
-    c.max_messages = 3
+    c.max_messages = 4
 
     c.plugins.prefix = /^\$/
     c.plugins.plugins = [
