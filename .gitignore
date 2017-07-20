@@ -4,3 +4,6 @@ db_repopulate.rb
 
 **/*.yml
 tmtags
+
+*.dump
+*.sh
