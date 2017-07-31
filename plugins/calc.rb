@@ -16,7 +16,7 @@ class Calc
     result = nil
     begin
       calculator = Dentaku::Calculator.new
-      result = calculator.evaluate(expr)
+      result = calculator.evaluate(expr, pi: Math::PI, e: Math::E)
       result = result.to_f if result.kind_of?(BigDecimal)
       result ||= "No result."
     rescue => e
