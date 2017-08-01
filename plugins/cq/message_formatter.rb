@@ -218,7 +218,7 @@ class CQ
     def formatted_championskill_message(champion, champion_skill)
       message = "#{champion.name}'s #{champion_skill.type.capitalize} Level #{champion_skill.level}" +
         " | Name - #{champion_skill.name}" +
-        " | Unlocks a Level #{champion_skill.unlock_level}"
+        " | Unlocks at Level #{champion_skill.unlock_level}"
 
       if champion_skill.type == "active"
         message << " | Cooldown - #{champion_skill.cooldown} seconds"
