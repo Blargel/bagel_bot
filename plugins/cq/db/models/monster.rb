@@ -42,6 +42,23 @@ class CQ
       def filter_name_by_regex(regex)
         where(:name => regex)
       end
+
+      def filter_id(query)
+        if query.kind_of?(Regexp)
+          filter_id_by_regex(query)
+        else
+          filter_id_by_substring(query)
+        end
+      end
+
+      def filter_id_by_substring(substr)
+        regex = Regexp.new(Regexp.quote(substr), true)
+        filter_id_by_regex(regex)
+      end
+
+      def filter_id_by_regex(regex)
+        where(:id => regex)
+      end
     end
 
     def stats(level)

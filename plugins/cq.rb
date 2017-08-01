@@ -474,7 +474,7 @@ class CQ
 
       raise CQ::Error.new("Invalid level: #{level}") if level.to_i < 1 || level.to_i.to_s != level
 
-      monster = CQ::Monster.filter_name(regex || query).first
+      monster = query.include?("_") ? CQ::Monster.filter_id(regex || query).first : CQ::Monster.filter_name(regex || query).first
 
       raise CQ::Error.new("No monsters's name matches \"#{query}\"!") unless monster
 
