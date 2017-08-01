@@ -58,7 +58,7 @@ bot = Cinch::Bot.new do
       "$champ",
       "$champion",
       "$championskill",
-      "$champskill"
+      "$champskill",
       "$commands",
       "$faction",
       "$find",
