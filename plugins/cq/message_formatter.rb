@@ -25,7 +25,7 @@ class CQ
     def formatted_hero_message(hero)
       "#{hero.name}" +
         " | Class - #{hero.stars}☆ #{hero.hero_class}" +
-        " | Faction - #{hero.faction.name}" +
+        " | Faction - #{hero.faction_name}" +
         " | How to get - #{hero.how_to_get}" +
         " | Gender - #{hero.gender}" +
         " | Background - #{hero.background}"
