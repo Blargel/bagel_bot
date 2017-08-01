@@ -28,9 +28,9 @@ bot = Cinch::Bot.new do
     c.channels    = ["#cquest"]
     c.delay_joins = :identified
 
-    c.nick     = "BagelBot"
-    c.realname = "BagelBot"
-    c.user     = "BagelBot"
+    c.nick     = "BagelBotTest"
+    c.realname = "BagelBotTest"
+    c.user     = "BagelBotTest"
 
     c.max_messages = 4
 

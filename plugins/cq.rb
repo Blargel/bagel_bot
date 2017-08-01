@@ -12,6 +12,8 @@ end
 
 require 'cq/db/models/berry'
 require 'cq/db/models/bread'
+require 'cq/db/models/champion'
+require 'cq/db/models/champion_skill'
 require 'cq/db/models/faction'
 require 'cq/db/models/hero'
 require 'cq/db/models/monster'
@@ -88,7 +90,7 @@ class CQ
                 when "weapon"
                   CQ::Weapon.filter_name_or_bound_to(regex || query).order_more(:stars).all
                 else
-                  raise CQ::Error.new("Unknown type: #{type} | Available types - berry, bread, hero, monster, skill, skin, weapon")
+                  raise CQ::Error.new("Unknown type: #{type} | Available types - berry, bread, champion, faction, hero, monster, skill, skin, weapon")
                 end
 
       raise CQ::Error.new("No #{type} results found for \"#{query}\"") if results.empty?
@@ -504,9 +506,9 @@ class CQ
 
   # Get a list of heroes that belong to a faction.
   #
-  # Usage: $faction pumpkin
+  # Usage: $faction name
   # Examples:
-  #   $skin d'art
+  #   $faction ryu
   match(/faction(?:$|(?: (.+)?))/, method: :cmd_faction)
   def cmd_faction(m, query)
     message_on_error(m) do
@@ -521,6 +523,56 @@ class CQ
       heroes = CQ::Hero.filter_faction(faction.id).filter_base_heroes.all
 
       m.reply("#{m.user.nick}: #{formatted_faction_message(faction, heroes)}")
+    end
+  end
+
+  # Get general information about a champion.
+  #
+  # Usage: $champion name
+  # Examples:
+  #   $champion galahad
+  match(/champ(?:ion)?(?:$|(?: (.+)?))/, method: :cmd_champion)
+  def cmd_champion(m, query)
+    message_on_error(m) do
+      raise CQ::Error.new("Missing parameters! | Usage - $champion name") unless query
+
+      query = query.strip
+
+      champion = CQ::Champion.filter_name(query).first
+
+      raise CQ::Error.new("No champion's name matches \"#{query}\"!") unless champion
+
+      m.reply("#{m.user.nick}: #{formatted_champion_message(champion)}")
+    end
+  end
+
+  # Get skill information about a champion.
+  #
+  # Usage: $championskill champ_name type [level]
+  # Examples:
+  #   $championskill noa active
+  #   $championskill winchester buff 2
+  match(/champ(?:ion)?skill(?:$|(?: (.+)?))/, method: :cmd_champion_skill)
+  def cmd_champion_skill(m, opts)
+    message_on_error(m) do
+      opts  = opts.strip.split
+      raise CQ::Error.new("Missing parameters! | Usage - $championskill champ_name type [level]") unless opts.count > 1
+
+      level = [1,2,3,4,5].include?(opts.last.to_i) ? opts.pop.to_i : nil
+      type  = ["active", "passive", "buff"].include?(opts.last.strip.downcase) ? opts.pop.strip.downcase : nil
+      name  = opts.join(" ")
+
+      champion = CQ::Champion.filter_name(name).first
+
+      raise CQ::Error.new("No champion's name matches \"#{name}\"!") unless champion
+      raise CQ::Error.new("Invalid champion skill type: \"#{type}\" | Available types - active, passive, buff") unless type
+
+      champion_skills = CQ::ChampionSkill.filter_champion_id(champion.id).filter_type(type).filter_level(level).all
+      champion_skill = champion_skills.max { |a, b| a.level <=> b.level }
+
+      raise CQ::Error.new("No level #{level} #{type} skill found for #{champion.name}!") if champion_skill.nil?
+
+      m.reply("#{m.user.nick}: #{formatted_championskill_message(champion, champion_skill)}")
     end
   end
 

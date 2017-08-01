@@ -1,8 +1,7 @@
 class CQ
-  class Faction < Sequel::Model(:factions)
+  class Champion < Sequel::Model(:champions)
     unrestrict_primary_key
-    one_to_many :heroes
-    one_to_many :champions
+    many_to_one :faction
 
     dataset_module do
       def filter_name(query)

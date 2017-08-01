@@ -2,7 +2,7 @@
 
 class CQ
   module MessageFormatter
-    # Message formatter for the !text command
+    # Message formatter for the $text command
     def formatted_text_message(num, texts)
       match_count  = texts.count
       num          = match_count if num > match_count
@@ -11,7 +11,7 @@ class CQ
       "[#{num}/#{match_count}] #{text.id} - #{text.content}"
     end
 
-    # Message formatter for the !find command
+    # Message formatter for the $find command
     def formatted_find_message(results)
       names = results.map(&:name).uniq
       count = names.count
@@ -21,7 +21,7 @@ class CQ
       "\x02(#{count} result#{"s" if count > 1} found#{over_50_text})\x02 - #{names}"
     end
 
-    # Message formatter for the !hero command
+    # Message formatter for the $hero command
     def formatted_hero_message(hero)
       "#{hero.name}" +
         " | Class - #{hero.stars}☆ #{hero.hero_class}" +
@@ -31,14 +31,14 @@ class CQ
         " | Background - #{hero.background}"
     end
 
-    # Message formatter for the !block command
+    # Message formatter for the $block command
     def formatted_block_message(hero)
       "#{hero.name}" +
         " | Class - #{hero.stars}☆ #{hero.hero_class}" +
         " | #{hero.block_name} - #{hero.block_desc}"
     end
 
-    # Message formatter for the !passive command
+    # Message formatter for the $passive command
     def formatted_passive_message(hero)
       passive = hero.passive_name && hero.passive_desc ? "#{hero.passive_name} - #{hero.passive_desc}" : "This hero has no passive."
       "#{hero.name}" +
@@ -46,7 +46,7 @@ class CQ
         " | #{passive}"
     end
 
-    # Message formatter for the !stats command
+    # Message formatter for the $stats command
     def formatted_stats_message(hero, level, bread, with_berry)
       stats = hero.stats(level, bread, with_berry)
 
@@ -67,7 +67,7 @@ class CQ
         " | #{stats["eva"]} Evasion"
     end
 
-    # Message formatter for the !skill command
+    # Message formatter for the $skill command
     def formatted_skill_message(skill)
       "#{skill.name} Lvl #{skill.level}" +
         " | Great - #{skill.great_rate}%" +
@@ -75,7 +75,7 @@ class CQ
         " | Description - #{skill.description}"
     end
 
-    # Message formatter for the !bread command
+    # Message formatter for the $bread command
     def formatted_bread_message(bread)
       "#{bread.name}" +
         " | #{bread.stars}☆ Bread" +
@@ -84,7 +84,7 @@ class CQ
         " | Sell Price - #{bread.sell_price}"
     end
 
-    # Message formatter for the !berry command
+    # Message formatter for the $berry command
     def formatted_berry_message(berry)
       "#{berry.name}" +
         " | #{berry.stars}☆ Berry" +
@@ -94,7 +94,7 @@ class CQ
         " | Sell Price - #{berry.sell_price}"
     end
 
-    # Message formatter for the !berrystats command
+    # Message formatter for the $berrystats command
     def formatted_berrystats_message(hero)
       "#{hero.name}" +
         " | Class - #{hero.stars}☆ #{hero.hero_class}" +
@@ -108,7 +108,7 @@ class CQ
         " | Evasion - #{(hero.berry_eva * 100).round(1)}"
     end
 
-    # Message formatter for the !weapon command
+    # Message formatter for the $weapon command
     def formatted_weapon_message(weapon)
       message = "#{weapon.name}" +
         " | #{weapon.stars}☆ #{weapon.weapon_class}" +
@@ -123,7 +123,7 @@ class CQ
       message
     end
 
-    # Message formatter for the !highscore command
+    # Message formatter for the $highscore command
     def formatted_highscore_message(results, stat)
       if results.kind_of?(Hash)
         formatted_highscore_without_params_message(results)
@@ -134,7 +134,7 @@ class CQ
       end
     end
 
-    # Message formatter for the !highscore command with params
+    # Message formatter for the $highscore command with params
     def formatted_highscore_without_params_message(results)
       "Atk Power - #{results["ha"][:name]} #{results["ha"][:value].round(1)}" +
         " | HP - #{results["hp"][:name]} #{results["hp"][:value].round(1)}" +
@@ -154,7 +154,7 @@ class CQ
         " | Berry Evasion - #{results["berry_eva"][:name]} #{(results["berry_eva"][:value]*100).round(1)}"
     end
 
-    # Message formatter for the !highscore command with params
+    # Message formatter for the $highscore command with params
     def formatted_highscore_with_params_message(results, stat)
       results.map! do |result|
         value = result[:value]
@@ -166,7 +166,7 @@ class CQ
       results.join(" | ")
     end
 
-    # Message formatter for the !stage command
+    # Message formatter for the $stage command
     def formatted_stage_message(stage)
       "#{stage.name}" +
         " | Cost - #{stage.meat_cost} meat" +
@@ -175,7 +175,7 @@ class CQ
         " | Enemies - #{stage.monster_list.join(", ")}"
     end
 
-    # Message formatter for the !monstats command
+    # Message formatter for the $monstats command
     def formatted_monsterstats_message(monster, level)
       stats = monster.stats(level)
       "Lvl #{level} #{monster.name}" +
@@ -193,17 +193,41 @@ class CQ
         " | #{stats["kb_resist"]} Knockback Resist"
     end
 
-    # Message formatter for the !skin command
+    # Message formatter for the $skin command
     def formatted_skin_message(skin)
       "#{skin.name}" +
         " | Sell Price - #{skin.sell_price} Gold" +
         " | Stats - #{skin.stats}"
     end
 
-    # Message formatter for the !faction command
+    # Message formatter for the $faction command
     def formatted_faction_message(faction, heroes)
       hero_names = heroes.map(&:name).uniq.join(", ")
       "Heroes in #{faction.name}: #{hero_names}"
+    end
+
+    # Message formatter for the $champion command
+    def formatted_champion_message(champion)
+      "#{champion.name}" +
+        " | Faction - #{champion.faction.name}" +
+        " | Type - #{champion.type}" +
+        " | Background - #{champion.background}"
+    end
+
+    # Message formatter for the $championskill command
+    def formatted_championskill_message(champion, champion_skill)
+      message = "#{champion.name}'s #{champion_skill.type.capitalize} Level #{champion_skill.level}" +
+        " | Name - #{champion_skill.name}" +
+        " | Unlocks a Level #{champion_skill.unlock_level}"
+
+      if champion_skill.type == "active"
+        message << " | Cooldown - #{champion_skill.cooldown} seconds"
+        message << " | Activation Limit - #{champion_skill.active_limit} times"
+      end
+
+      message << " | Description - #{champion_skill.description}"
+
+      message
     end
 
     # Calculate all stats for a hero with the given data
