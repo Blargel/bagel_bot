@@ -25,7 +25,7 @@ class CQ
     def formatted_hero_message(hero)
       "#{hero.name}" +
         " | Class - #{hero.stars}☆ #{hero.hero_class}" +
-        " | Faction - #{hero.faction}" +
+        " | Faction - #{hero.faction.name}" +
         " | How to get - #{hero.how_to_get}" +
         " | Gender - #{hero.gender}" +
         " | Background - #{hero.background}"
@@ -40,9 +40,10 @@ class CQ
 
     # Message formatter for the !passive command
     def formatted_passive_message(hero)
+      passive = hero.passive_name && hero.passive_desc ? "#{hero.passive_name} - #{hero.passive_desc}" : "This hero has no passive."
       "#{hero.name}" +
         " | Class - #{hero.stars}☆ #{hero.hero_class}" +
-        " | #{hero.passive_name} - #{hero.passive_desc}"
+        " | #{passive}"
     end
 
     # Message formatter for the !stats command
@@ -186,9 +187,10 @@ class CQ
         " | #{stats["cd"]} Crit Dmg" +
         " | #{stats["acc"]} Accuracy" +
         " | #{stats["eva"]} Evasion" +
-        " | #{stats["apen"]} Armor Penetration" +
-        " | #{stats["rpen"]} Resistance Penetration" +
-        " | #{stats["dr"]}% Dmg Reduction"
+        " | #{stats["apen"]} Armor Pen" +
+        " | #{stats["rpen"]} Resistance Pen" +
+        " | #{stats["dr"]}% Dmg Reduction" +
+        " | #{stats["kb_resist"]} Knockback Resist"
     end
 
     # Message formatter for the !skin command
@@ -196,6 +198,12 @@ class CQ
       "#{skin.name}" +
         " | Sell Price - #{skin.sell_price} Gold" +
         " | Stats - #{skin.stats}"
+    end
+
+    # Message formatter for the !faction command
+    def formatted_faction_message(faction, heroes)
+      hero_names = heroes.map(&:name).uniq.join(", ")
+      "Heroes in #{faction.name}: #{hero_names}"
     end
 
     # Calculate all stats for a hero with the given data

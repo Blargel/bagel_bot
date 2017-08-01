@@ -56,7 +56,8 @@ class CQ
         "eva" => calculate_percent_stat(eva),
         "apen" => arm_pen.round,
         "rpen" => res_pen.round,
-        "dr" => calculate_percent_stat(dr)
+        "dr" => calculate_percent_stat(dr),
+        "kb_resist" => kb_resist
       }
     end
 

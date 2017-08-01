@@ -12,6 +12,7 @@ end
 
 require 'cq/db/models/berry'
 require 'cq/db/models/bread'
+require 'cq/db/models/faction'
 require 'cq/db/models/hero'
 require 'cq/db/models/monster'
 require 'cq/db/models/skill'
@@ -74,6 +75,8 @@ class CQ
                   CQ::Berry.filter_name(regex || query).order_more(:stars).all
                 when "bread"
                   CQ::Bread.filter_name(regex || query).order_more(:stars).all
+                when "faction"
+                  CQ::Faction.filter_name(regex || query).all
                 when "hero"
                   CQ::Hero.filter_name(regex || query).order_more(:stars).all
                 when "monster"
@@ -496,6 +499,28 @@ class CQ
       raise CQ::Error.new("No skin's name matches \"#{query}\"!") unless skin
 
       m.reply("#{m.user.nick}: #{formatted_skin_message(skin)}")
+    end
+  end
+
+  # Get a list of heroes that belong to a faction.
+  #
+  # Usage: $faction pumpkin
+  # Examples:
+  #   $skin d'art
+  match(/faction(?:$|(?: (.+)?))/, method: :cmd_faction)
+  def cmd_faction(m, query)
+    message_on_error(m) do
+      raise CQ::Error.new("Missing parameters! | Usage - $faction query") unless query
+
+      query = query.strip
+
+      faction = CQ::Faction.filter_name(query).first
+
+      raise CQ::Error.new("No faction's name matches \"#{query}\"!") unless faction
+
+      heroes = CQ::Hero.filter_faction(faction.id).filter_base_heroes.all
+
+      m.reply("#{m.user.nick}: #{formatted_faction_message(faction, heroes)}")
     end
   end
 

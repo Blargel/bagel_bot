@@ -1,12 +1,34 @@
 class CQ
   class Hero < Sequel::Model(:heroes)
     unrestrict_primary_key
+    many_to_one :faction
     many_to_many :weapons, :join_table => :weapons_heroes
 
     dataset_module do
       def filter_stars(stars)
         return self unless stars
         where(:stars => stars)
+      end
+
+      def filter_faction(faction)
+        return self unless faction
+        where(:faction_id => faction)
+      end
+
+      def filter_base_heroes
+        where(
+          Sequel.|(
+            Sequel.&(
+              hero_type: "DESTINY",
+              stars: 1
+            ),
+            Sequel.&(
+              hero_type: ["LEGENDARY", "LIMITED"],
+              stars: 4
+            ),
+            hero_type: "SUPPORT"
+          )
+        )
       end
 
       def filter_name(query)
@@ -60,6 +82,10 @@ class CQ
         "acc" => calculate_percent_stat(with_berry, acc, berry_acc),
         "eva" => calculate_percent_stat(with_berry, eva, berry_eva)
       }
+    end
+
+    def faction_name
+      faction_id ? faction.name : "None"
     end
 
     private
