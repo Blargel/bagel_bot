@@ -77,6 +77,8 @@ class CQ
                   CQ::Berry.filter_name(regex || query).order_more(:stars).all
                 when "bread"
                   CQ::Bread.filter_name(regex || query).order_more(:stars).all
+                when "champion"
+                  CQ::Champion.filter_name(regex || query).all
                 when "faction"
                   CQ::Faction.filter_name(regex || query).all
                 when "hero"
